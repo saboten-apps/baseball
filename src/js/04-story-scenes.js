@@ -230,7 +230,7 @@ function showMascotGallery(index, back) {
   const gallery = mascotGallery; gallery.index = index; gallery.back = back || startStory;
   setTeam(gallery.f, MASCOT_GALLERY[index][0]); gallery.active = true;
   $('#overlay').classList.add('gallery');
-  overlay({ title: MASCOT_GALLERY[index][1], text: (index===0?'参考画像に合わせた、ぬいぐるみ2頭身の柴犬試作。':'提供モデルをゲームの動きに合わせた姿。 ') + (index + 1) + '/' + MASCOT_GALLERY.length,
+  overlay({ title: MASCOT_GALLERY[index][1], text: '丸い2頭身と短い足の、ぬいぐるみスタイル。 ' + (index + 1) + '/' + MASCOT_GALLERY.length,
     b1: ['次のキャラ →', () => showMascotGallery((index + 1) % MASCOT_GALLERY.length, gallery.back)],
     b2: ['← 前のキャラ', () => showMascotGallery((index + MASCOT_GALLERY.length - 1) % MASCOT_GALLERY.length, gallery.back)],
     b3: ['回転する', () => { gallery.yaw += Math.PI / 3; }], b4: ['もどる', () => { const cb = gallery.back; closeMascotGallery(); cb(); }] });
@@ -243,18 +243,15 @@ function renderMascotGallery(now) {
   const g = mascotGallery; if (!g || !g.active) return false;
   const yaw = g.yaw;
   const J = squashJ(fielderJ(0, 0, 0, 0, 0, 0, 0), 0);
-  // Both paws meet the grip instead of retaining the prototype's floating bat.
-  J.hL.set(0.10, 0.70, 0.34); J.hR.set(0.14, 0.76, 0.34);
-  if(g.f.sp==='shiba'){
-    J.hL.set(.30,.45,.02);J.hR.set(-.30,.45,.02);
-    J.fL.x=.14;J.fR.x=-.14;
-  }
+  // Neutral plush pose keeps the short legs and round silhouette visible.
+  J.hL.set(.30,.45,.02); J.hR.set(-.30,.45,.02);
+  J.fL.x=.14; J.fR.x=-.14;
   J.eL.copy(J.sL).lerp(J.hL, 0.5); J.eR.copy(J.sR).lerp(J.hR, 0.5);
   poseFig(g.f, J, 0, 0); faceFor(g.f, 'smile', now);
   g.f.g.rotation.y = yaw; g.f.g.position.y = 0.40;
   g.bat.position.set(0.10, 0.63, 0.34); g.bat.rotation.set(0, 0, -0.35);
-  g.bat.visible = g.f.sp!=='shiba'; if (g.f.mitt) g.f.mitt.visible = false;
-  g.world.background.set(g.f.sp==='shiba'?'#d8e7e0':'#eaf3e5');
-  g.cam.fov = 42; g.cam.aspect = W / H; g.cam.position.set(0, 1.2, 3.5); g.cam.lookAt(0, 0.90, 0); g.cam.updateProjectionMatrix();
+  g.bat.visible = false; if (g.f.mitt) g.f.mitt.visible = false;
+  g.world.background.set('#d8e7e0');
+  g.cam.fov = 42; g.cam.aspect = W / H; g.cam.position.set(0, 1.3, g.f.sp==='usagi'?4.15:3.5); g.cam.lookAt(0, g.f.sp==='usagi'?1.08:0.90, 0); g.cam.updateProjectionMatrix();
   renderer.render(g.world, g.cam); return true;
 }

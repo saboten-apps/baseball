@@ -8,6 +8,10 @@ try{
   assert.equal((await p.evaluate(()=>__dbg.plushState())).base,false);
   for(const [width,height] of [[320,568],[390,844],[1280,800]]){await p.setViewportSize({width,height});await p.screenshot({path:`tools/test/plush-shiba-${width}.png`});}
   await p.click('#go3');await p.screenshot({path:'tools/test/plush-shiba-side.png'});
-  await p.click('#goBtn');await p.waitForFunction(()=>__dbg.gallery.species==='tiger');assert.equal((await p.evaluate(()=>__dbg.plushState())).base,true);assert.equal((await p.evaluate(()=>__dbg.plushState())).plush,false);
-  assert.deepEqual(errors,[]);console.log('✓ Shiba plush preview, three viewports, rotation and switching back to the original tiger');console.log('[]');
+  for(const species of ['tiger','neko','usagi','kuma','floppy','human','alien','panda']){
+    await p.click('#goBtn');await p.waitForFunction(sp=>__dbg.plushState().species===sp&&__dbg.plushState().plush,species);
+    assert.equal((await p.evaluate(()=>__dbg.plushState())).base,false);
+    await p.screenshot({path:'tools/test/plush-'+species+'.png'});
+  }
+  assert.deepEqual(errors,[]);console.log('✓ All nine plush species, three viewports and rotation');console.log('[]');
 }finally{await b.close();}

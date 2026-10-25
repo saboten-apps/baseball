@@ -209,3 +209,5 @@ URL は `src/js/06-online.js`、`README.md`、`build.mjs` にあり、`node buil
 
 **GitHub 側の自動チェック**：`.github/workflows/check.yml` が push のたびに `check --full` と「docs/ の出し忘れ」を確認する。赤くなったら、上の手順で原因を探す（本番は止まらない）。
 **外部サービスの障害**：オンラインは Supabase、公開は GitHub Pages に頼っている。コードを直す前に、向こうの障害でないかも疑う。
+
+- 2026-10-25 Codex：柴犬の承認済みぬいぐるみ造形（丸い2頭身・短い足・太い茶色の輪郭）を全9種へ展開。耳・顔模様・配色は種別ごと、共通の試合ジョイントと手の位置を保持。作業ブランチ feature/plush-shiba と確認サイトで確認し、本番 main は未変更。

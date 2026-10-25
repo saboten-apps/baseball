@@ -47,7 +47,7 @@ window.__dbg.reviewOfferExpire=()=>{if(onlineReview.ctx){onlineReview.ctx.until=
 window.__dbg.pitcherView=(team,k=0,beast=false)=>{
   update=()=>{};camShot=null;play=null;setTeam(pitcherF,team);resize();updateCamera(now_(),0);
   const J=squashJ(pitcherJ(k),MOUND_Y);poseFig(pitcherF,J,0,0);beastForm(pitcherF,beast);posePlushShiba(pitcherF,J,0,0);scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
-  const points=[],head=pitcherF.sp==='shiba'?pitcherF.plush.head:pitcherF.head;head.traverseVisible(m=>{if(!m.isMesh)return;if(!m.geometry.boundingBox)m.geometry.computeBoundingBox();const b=m.geometry.boundingBox;for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z])points.push(V(x,y,z).applyMatrix4(m.matrixWorld).project(camera));});
+  const points=[],head=pitcherF.plush?pitcherF.plush.head:pitcherF.head;head.traverseVisible(m=>{if(!m.isMesh)return;if(!m.geometry.boundingBox)m.geometry.computeBoundingBox();const b=m.geometry.boundingBox;for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z])points.push(V(x,y,z).applyMatrix4(m.matrixWorld).project(camera));});
   const rect=pts=>({left:Math.min(...pts.map(p=>(p.x+1)*W/2)),right:Math.max(...pts.map(p=>(p.x+1)*W/2)),top:Math.min(...pts.map(p=>(1-p.y)*H/2)),bottom:Math.max(...pts.map(p=>(1-p.y)*H/2))});
   return {head:rect(points),zone:rect([-1,1].flatMap(x=>[-1,1].map(y=>zoneToWorld(x,y).project(camera)))),scale:pitcherF.head.scale.x};
 };
@@ -56,7 +56,7 @@ window.__dbg.batterView=(team,k=0,beast=false,left=false,factor=null)=>{
   const bj=batterJ(0,k),J=squashJ(bj.J,0,true);poseFig(batterF,J,left?-Math.PI/2:Math.PI/2,Math.PI);beastForm(batterF,beast);fitBatterHead(batterF,J);posePlushShiba(batterF,J,left?-Math.PI/2:Math.PI/2,Math.PI);
   if(factor!==null){batterF.head.scale.setScalar(HEAD_K*(beast?1.25:1)*factor);}
   batG.position.copy(bj.G);batG.quaternion.setFromUnitVectors(_Y,bj.dir);scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
-  const points=[],visibleHead=batterF.sp==='shiba'?batterF.plush.head:batterF.head;visibleHead.traverseVisible(m=>{if(!m.isMesh)return;if(!m.geometry.boundingBox)m.geometry.computeBoundingBox();const b=m.geometry.boundingBox;for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z])points.push(V(x,y,z).applyMatrix4(m.matrixWorld).project(camera));});
+  const points=[],visibleHead=batterF.plush?batterF.plush.head:batterF.head;visibleHead.traverseVisible(m=>{if(!m.isMesh)return;if(!m.geometry.boundingBox)m.geometry.computeBoundingBox();const b=m.geometry.boundingBox;for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z])points.push(V(x,y,z).applyMatrix4(m.matrixWorld).project(camera));});
   const rect=pts=>({left:Math.min(...pts.map(p=>(p.x+1)*W/2)),right:Math.max(...pts.map(p=>(p.x+1)*W/2)),top:Math.min(...pts.map(p=>(1-p.y)*H/2)),bottom:Math.max(...pts.map(p=>(1-p.y)*H/2))});
   const head=rect(points),zone=rect([-1,1].flatMap(x=>[-1,1].map(y=>zoneToWorld(x,y).project(camera))));
   return {head,zone,scale:batterF.head.scale.x,gap:Math.max(zone.left-head.right,head.left-zone.right)};

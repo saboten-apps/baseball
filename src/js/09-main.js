@@ -345,7 +345,7 @@ function updateCamera(now, dt) {
   else if (camShot && now >= camShot.at) shot = camShot;
   if (shot) { camPos.copy(shot.pos); camLook.copy(shot.look); camFov = shot.fov; }
   else { camPos.copy(CAM_HOME); camLook.copy(homeLook()); camFov = homeFov; }
-  if(!shot&&batterF.sp==='shiba'){
+  if(!shot){
     camFov=clamp(2*Math.atan(.36/camera.aspect)/D2R,40,70);
     const pitch=Math.atan2(ZY0-CAM_HOME.y,CAM_HOME.z)+Math.atan(.22*Math.tan(camFov/2*D2R));
     camPos.x=(shownLeft?1:-1)*.60;camLook.set(camPos.x,CAM_HOME.y+Math.sin(pitch)*10,CAM_HOME.z-Math.cos(pitch)*10);
