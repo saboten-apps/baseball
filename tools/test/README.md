@@ -27,6 +27,7 @@
     node tools/test/online-review.mjs         # 一塁/盗塁/本塁の精密再判定・3Dリプレイ3サイズ・境界50%/三振/押し出し取消・スキップ同期/共通回数・遅延投球取消・再戦初期化（--pitch-onlyで投球/スキップだけ）
     node tools/test/pitcher-clearance.mjs     # 投手9種×通常/ビースト×投球4姿勢×3画面幅の頭部とゾーンの非重複・スクショ
     node tools/test/batter-clearance.mjs      # 打者9種×左右×通常/ビースト×構え4姿勢×3画面幅の頭部とゾーンの非重複・スクショ
+    node tools/test/plush-shiba.mjs           # 柴犬のぬいぐるみ試作3サイズ・回転・トラへ戻すと従来メッシュ復帰
     node tools/test/beast-effects.mjs         # 獣化カットイン3サイズ・軽減設定・第8話の実覚醒・打撃衝撃・終了時解除
     node tools/test/stadium.mjs              # 10章の球場・覚醒照明・寸法保持・背景再利用・通常球場復帰・3画面サイズ
 

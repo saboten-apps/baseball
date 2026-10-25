@@ -167,6 +167,7 @@ Object.keys(SPECIES).forEach(sp => {
 COMMON.FACE = FACE_MATS.shiba.normal; COMMON.MOUTHO = new THREE.MeshBasicMaterial({ color: '#5a1c24' });
 function setFace(f, ex) {
   if (f.ex === ex) return; f.ex = ex;
+  setPlushShibaFace(f,ex);
   const sp = f.sp || 'shiba';
   f.face.material = (FACE_MATS[sp] || FACE_MATS.shiba)[ex];
   if (f.coneEar) {
@@ -353,6 +354,7 @@ function poseFig(f, J, yaw, headYaw) {
   if (f.mitt) { f.mitt.position.copy(J.hL); f.mitt.scale.set(0.1, 0.115, 0.065); f.mitt.rotation.set(0, headYaw, 0); }
   beastForm(f, (f === pitcherF && beastForRole('pit')) || (f === batterF && beastForRole('bat')));
   fitBatterHead(f,J);
+  posePlushShiba(f,J,yaw,headYaw);
 }
 
 /* ---- right-handed batter ---- */
