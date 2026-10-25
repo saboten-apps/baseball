@@ -13,5 +13,6 @@ try{
     assert.equal((await p.evaluate(()=>__dbg.plushState())).base,false);
     await p.screenshot({path:'tools/test/plush-'+species+'.png'});
   }
+  assert.ok(await p.evaluate(()=>__dbg.plushContact())<1e-6,'contact path is unchanged for both batting sides');
   assert.deepEqual(errors,[]);console.log('✓ All nine plush species, three viewports and rotation');console.log('[]');
 }finally{await b.close();}

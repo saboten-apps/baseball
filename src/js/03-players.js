@@ -429,6 +429,9 @@ function batterJ(now, k) {
   const dtb = clamp(now - buntT, 0, 0.1); buntT = now;
   buntK += ((bunting ? 1 : 0) - buntK) * Math.min(1, dtb * 10);
   if (buntK < 0.01) buntK = 0;
+  // Bring the waiting grip beside the plush torso. Return to the original
+  // swing path before contact, so the bat still meets the simulated ball.
+  if(!bunting)G.x+=(X0<0?-.40:.40)*(sw<0?1:1-clamp(sw/Math.max(.001,SWING_LEAD),0,1));
   const B = batterBody(fi);
   const hF = G.clone().addScaledVector(dir, 0.04), hB = G.clone().addScaledVector(dir, 0.12);
   const eF = B.sL.clone().lerp(hF, 0.5).add(V(0.02, -0.12, -0.04)), eB = B.sR.clone().lerp(hB, 0.5).add(V(0, -0.13, 0.06));

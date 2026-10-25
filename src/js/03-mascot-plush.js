@@ -83,7 +83,7 @@ function posePlushShiba(f,J,yaw,headYaw){
   if(!active)return;
   f.curl.visible=f.longT.visible=f.ball.visible=false;
   const p=f.plush,bulk=f.beastOn?1.15:1;
-  // Move the complete stance away from the plate; keep both paws on the bat.
+  // Move the complete stance away from the plate; keep both paws on the bat. The waiting grip follows this offset in batterJ.
   // Reuse joint vectors so the neck, torso and legs stay connected every frame.
   if(f===batterF){
     if(!p.stanceJ)p.stanceJ={};
@@ -95,14 +95,16 @@ function posePlushShiba(f,J,yaw,headYaw){
     }
     J=p.stanceJ;
   }
-  p.body.position.copy(J.pelvis).lerp(J.neck,.48);p.body.position.y-=.06;p.body.rotation.y=yaw;p.body.scale.set(.27*bulk,.34,.24*bulk);
+  p.body.position.copy(J.pelvis).lerp(J.neck,.48);p.body.position.y-=.06;p.body.rotation.y=yaw;p.body.scale.set(.35*bulk,.40,.31*bulk);
   p.head.position.copy(J.neck);p.head.position.y+=.18;p.head.rotation.y=headYaw;p.head.scale.setScalar(f.beastOn?1.05:1);
   for(let i=0;i<2;i++){
     const s=i===0?'L':'R',shoulder=J['s'+s],hand=J['h'+s],hip=J['hip'+s],foot=J['f'+s];
     const arm=p.arms[i],leg=p.legs[i];
-    arm.position.copy(shoulder).lerp(hand,.53);arm.quaternion.setFromUnitVectors(_Y,_d.subVectors(hand,shoulder).normalize());arm.scale.set(.105*bulk,Math.max(.12,shoulder.distanceTo(hand)*.53),.11*bulk);
-    p.paws[i].position.copy(hand);leg.position.copy(hip).lerp(foot,.68);leg.quaternion.setFromUnitVectors(_Y,_d.subVectors(foot,hip).normalize());leg.scale.set(.12,Math.max(.10,hip.distanceTo(foot)*.38),.13);
-    p.feet[i].position.copy(foot);p.feet[i].position.y+=.075;p.feet[i].rotation.y=yaw;
+    // Rounded cuffs follow the paws instead of stretching a cylinder across the gap.
+    _d.subVectors(hand,shoulder).normalize();
+    arm.position.copy(hand).addScaledVector(_d,-.085);arm.quaternion.setFromUnitVectors(_Y,_d);arm.scale.set(.12*bulk,Math.min(.17,Math.max(.10,shoulder.distanceTo(hand)*.35)),.125*bulk);
+    p.paws[i].position.copy(hand);p.paws[i].scale.set(.12*bulk,.13,.115*bulk);leg.position.copy(hip).lerp(foot,.68);leg.quaternion.setFromUnitVectors(_Y,_d.subVectors(foot,hip).normalize());leg.scale.set(.12,Math.max(.10,hip.distanceTo(foot)*.38),.13);
+    p.feet[i].position.copy(foot);p.feet[i].position.y+=.075;p.feet[i].rotation.y=yaw;p.feet[i].scale.set(.15,.13,.18);
   }
   p.tail.position.copy(J.pelvis);p.tail.position.x-=Math.sin(yaw)*.24;p.tail.position.z-=Math.cos(yaw)*.24;p.tail.position.y+=.03;
 }

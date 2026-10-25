@@ -12,6 +12,6 @@ try{
   }
   if(process.argv.includes('--measure')){
     const limits={};for(const v of measurements){const key=v.team+':'+v.beast;limits[key]=Math.min(limits[key]??1,v.factor);}console.log(JSON.stringify(limits));
-  }else{measurements.sort((a,b)=>a.gap-b.gap);console.log(JSON.stringify({samples:measurements.length,worst:measurements[0]}));for(const v of measurements){assert.ok(v.gap>=3,JSON.stringify(v));assert.ok(v.alignment.neck<1e-6,JSON.stringify(v));assert.ok(v.alignment.torso<.20,JSON.stringify(v));assert.ok(v.alignment.grip<1e-6,JSON.stringify(v));}}
+  }else{measurements.sort((a,b)=>a.gap-b.gap);console.log(JSON.stringify({samples:measurements.length,worst:measurements[0]}));for(const v of measurements){assert.ok(v.gap>=3,JSON.stringify(v));assert.ok(v.alignment.arm<=.17,JSON.stringify(v));assert.ok(v.alignment.body>=.35,JSON.stringify(v));assert.ok(v.alignment.neck<1e-6,JSON.stringify(v));assert.ok(v.alignment.torso<.20,JSON.stringify(v));assert.ok(v.alignment.grip<1e-6,JSON.stringify(v));}}
   assert.deepEqual(errors,[]);console.log('[]');
 }finally{await b.close();}

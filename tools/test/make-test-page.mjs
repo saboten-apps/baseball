@@ -41,6 +41,17 @@ window.__dbg.reviewHold=stage=>{reviewHoldForTest=stage;};
 window.__dbg.reviewOfferHold=()=>{if(onlineReview.ctx){onlineReview.ctx.until=now_()+3600;nextAt=onlineReview.ctx.until;}};
 window.__dbg.freezeReviewOffers=()=>{const result=runOnlineResult;runOnlineResult=(...args)=>{result(...args);if(onlineReview.ctx&&onlineReview.ctx.until)onlineReview.ctx.until=now_()+3600;nextAt=Infinity;};};
 window.__dbg.bankedScore=()=>({...onl.score});
+window.__dbg.plushContact=()=>{
+  const previous={batAnim,shownLeft,buntK,buntT},errors=[];
+  for(const left of [false,true])for(const x of [-.25,0,.25]){
+    shownLeft=left;buntK=0;buntT=10;batAnim={t0:10,plan:makeSwingPlan(V(x,1,0))};
+    const actual=batterJ(10+SWING_LEAD,0),expected=swingAt(SWING_LEAD,batAnim.plan);
+    if(left){expected.G=mirX(expected.G);expected.dir=mirX(expected.dir);}
+    errors.push(actual.G.distanceTo(expected.G),actual.dir.distanceTo(expected.dir));
+  }
+  batAnim=previous.batAnim;shownLeft=previous.shownLeft;buntK=previous.buntK;buntT=previous.buntT;
+  return Math.max(...errors);
+};
 window.__dbg.plushPreview=()=>showMascotGallery(0);
 window.__dbg.plushState=()=>{const f=mascotGallery.f;return {species:f.sp,plush:!!f.plush&&f.plush.root.visible,base:f.body.visible,head:f.head.visible,meshes:f.plush?f.plush.root.children.length:0,face:f.ex};};
 window.__dbg.reviewOfferExpire=()=>{if(onlineReview.ctx){onlineReview.ctx.until=now_()-1;nextAt=Infinity;}};
@@ -52,7 +63,7 @@ window.__dbg.pitcherView=(team,k=0,beast=false)=>{
   return {head:rect(points),zone:rect([-1,1].flatMap(x=>[-1,1].map(y=>zoneToWorld(x,y).project(camera)))),scale:pitcherF.head.scale.x};
 };
 window.__dbg.batterView=(team,k=0,beast=false,left=false,factor=null)=>{
-  update=()=>{};camShot=null;play=null;batAnim=null;shownLeft=left;shownStar=false;setTeam(batterF,team);resize();updateCamera(now_(),0);
+  update=()=>{};phase='wait';nextAt=Infinity;ball=null;camShot=null;play=null;batAnim=null;shownLeft=left;shownStar=false;setTeam(batterF,team);resize();updateCamera(now_(),0);
   const bj=batterJ(0,k),J=squashJ(bj.J,0,true);poseFig(batterF,J,left?-Math.PI/2:Math.PI/2,Math.PI);beastForm(batterF,beast);fitBatterHead(batterF,J);posePlushShiba(batterF,J,left?-Math.PI/2:Math.PI/2,Math.PI);
   if(factor!==null){batterF.head.scale.setScalar(HEAD_K*(beast?1.25:1)*factor);}
   batG.position.copy(bj.G);batG.quaternion.setFromUnitVectors(_Y,bj.dir);scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
@@ -60,7 +71,7 @@ window.__dbg.batterView=(team,k=0,beast=false,left=false,factor=null)=>{
   const rect=pts=>({left:Math.min(...pts.map(p=>(p.x+1)*W/2)),right:Math.max(...pts.map(p=>(p.x+1)*W/2)),top:Math.min(...pts.map(p=>(1-p.y)*H/2)),bottom:Math.max(...pts.map(p=>(1-p.y)*H/2))});
   const head=rect(points),zone=rect([-1,1].flatMap(x=>[-1,1].map(y=>zoneToWorld(x,y).project(camera))));
   const plush=batterF.plush;
-  const alignment=plush?{neck:Math.abs(plush.head.position.x-plush.stanceJ.neck.x),torso:Math.abs(plush.head.position.x-plush.body.position.x),grip:Math.max(plush.paws[0].position.distanceTo(J.hL),plush.paws[1].position.distanceTo(J.hR))}:null;
+  const alignment=plush?{arm:Math.max(...plush.arms.map(m=>m.scale.y)),body:plush.body.scale.x,neck:Math.abs(plush.head.position.x-plush.stanceJ.neck.x),torso:Math.abs(plush.head.position.x-plush.body.position.x),grip:Math.max(plush.paws[0].position.distanceTo(J.hL),plush.paws[1].position.distanceTo(J.hR))}:null;
   return {head,zone,alignment,scale:batterF.head.scale.x,gap:Math.max(zone.left-head.right,head.left-zone.right)};
 };
 window.__dbg.renderOn=()=>{renderer.render=renderForReviewTest;};
