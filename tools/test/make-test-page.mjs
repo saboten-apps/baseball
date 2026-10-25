@@ -59,7 +59,9 @@ window.__dbg.batterView=(team,k=0,beast=false,left=false,factor=null)=>{
   const points=[],visibleHead=batterF.plush?batterF.plush.head:batterF.head;visibleHead.traverseVisible(m=>{if(!m.isMesh)return;if(!m.geometry.boundingBox)m.geometry.computeBoundingBox();const b=m.geometry.boundingBox;for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z])points.push(V(x,y,z).applyMatrix4(m.matrixWorld).project(camera));});
   const rect=pts=>({left:Math.min(...pts.map(p=>(p.x+1)*W/2)),right:Math.max(...pts.map(p=>(p.x+1)*W/2)),top:Math.min(...pts.map(p=>(1-p.y)*H/2)),bottom:Math.max(...pts.map(p=>(1-p.y)*H/2))});
   const head=rect(points),zone=rect([-1,1].flatMap(x=>[-1,1].map(y=>zoneToWorld(x,y).project(camera))));
-  return {head,zone,scale:batterF.head.scale.x,gap:Math.max(zone.left-head.right,head.left-zone.right)};
+  const plush=batterF.plush;
+  const alignment=plush?{neck:Math.abs(plush.head.position.x-plush.stanceJ.neck.x),torso:Math.abs(plush.head.position.x-plush.body.position.x),grip:Math.max(plush.paws[0].position.distanceTo(J.hL),plush.paws[1].position.distanceTo(J.hR))}:null;
+  return {head,zone,alignment,scale:batterF.head.scale.x,gap:Math.max(zone.left-head.right,head.left-zone.right)};
 };
 window.__dbg.renderOn=()=>{renderer.render=renderForReviewTest;};
 const reviewDrawForTest=renderReviewField;let holdReviewDrawForTest=false;

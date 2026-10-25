@@ -2182,9 +2182,20 @@ function posePlushShiba(f,J,yaw,headYaw){
   if(!active)return;
   f.curl.visible=f.longT.visible=f.ball.visible=false;
   const p=f.plush,bulk=f.beastOn?1.15:1;
+  // Move the complete stance away from the plate; keep both paws on the bat.
+  // Reuse joint vectors so the neck, torso and legs stay connected every frame.
+  if(f===batterF){
+    if(!p.stanceJ)p.stanceJ={};
+    const side=J.pelvis.x<0?-1:1;
+    for(const key in J){
+      if(!p.stanceJ[key])p.stanceJ[key]=new THREE.Vector3();
+      p.stanceJ[key].copy(J[key]);
+      if(key!=='hL'&&key!=='hR')p.stanceJ[key].x+=side*.40;
+    }
+    J=p.stanceJ;
+  }
   p.body.position.copy(J.pelvis).lerp(J.neck,.48);p.body.position.y-=.06;p.body.rotation.y=yaw;p.body.scale.set(.27*bulk,.34,.24*bulk);
   p.head.position.copy(J.neck);p.head.position.y+=.18;p.head.rotation.y=headYaw;p.head.scale.setScalar(f.beastOn?1.05:1);
-  if(f===batterF)p.head.position.x=(J.head.x<0?-1:1)*Math.max(1.02,Math.abs(J.head.x));
   for(let i=0;i<2;i++){
     const s=i===0?'L':'R',shoulder=J['s'+s],hand=J['h'+s],hip=J['hip'+s],foot=J['f'+s];
     const arm=p.arms[i],leg=p.legs[i];
