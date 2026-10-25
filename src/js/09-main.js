@@ -347,7 +347,9 @@ function updateCamera(now, dt) {
   else { camPos.copy(CAM_HOME); camLook.copy(homeLook()); camFov = homeFov; }
   if(!shot){
     // Keep the pitch target centered for either batting side.
-    camFov=clamp(2*Math.atan(.32/camera.aspect)/D2R,40,72);
+    const zoneDistance=Math.hypot(1.6-ZY0,3.8);
+    // Reserve at least 42% of the canvas width for the pitch target.
+    camFov=2*Math.atan(ZW/(.42*zoneDistance*camera.aspect))/D2R;
     camPos.set(0,1.6,3.8);camLook.set(0,ZY0,0);
   }
   camera.position.copy(camPos);
