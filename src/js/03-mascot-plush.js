@@ -3,7 +3,7 @@ let plushShibaAssets=null;
 function buildPlushShiba(f){
   if(!plushShibaAssets){
     const material=c=>new THREE.MeshToonMaterial({color:new THREE.Color(c).convertSRGBToLinear().multiplyScalar(.55),gradientMap:GRAD});
-    plushShibaAssets={ball:new THREE.SphereGeometry(1,16,12),ear:new THREE.ConeGeometry(1,1,6),
+    plushShibaAssets={ball:new THREE.SphereGeometry(1,16,12),ear:new THREE.ConeGeometry(1,1,6),collar:new THREE.TorusGeometry(.31,.018,8,32),
       fur:material('#e58a33'),cream:material('#ffebba'),inner:material('#efc2ac'),pink:material('#e6a395'),
       ink:material('#372c26'),shine:new THREE.MeshBasicMaterial({color:'#fff9e8'}),
       line:new THREE.MeshBasicMaterial({color:new THREE.Color('#654b36').convertSRGBToLinear(),side:THREE.BackSide})};
@@ -22,8 +22,11 @@ function buildPlushShiba(f){
   ball(a.cream,body,0,-.04,.96,.72,.78,.15);
   const head=new THREE.Group();root.add(head);
   ball(a.fur,head,0,0,0,.44,.40,.35);
-  ball(a.cream,head,0,-.15,.30,.28,.13,.075);
-  ball(a.ink,head,0,-.11,.383,.038,.029,.024);
+  // A continuous dark neckline separates the same-colored head and torso.
+  const neckline=new THREE.Mesh(a.collar,a.ink);neckline.rotation.x=Math.PI/2;
+  neckline.position.y=-.30;neckline.scale.set(1.12,.90,1);head.add(neckline);
+  ball(a.cream,head,0,-.10,.33,.28,.12,.075);
+  ball(a.ink,head,0,-.075,.425,.038,.029,.024);
   const eyes=[],lids=[];
   for(const s of [-1,1]){
     if(f.sp==='usagi'){
@@ -57,7 +60,7 @@ function buildPlushShiba(f){
     ball(a.pink,head,s*.29,-.095,.268,.035,.023,.016,false);
     const lid=mesh(MOUTHG,a.ink,head,s*.155,.025,.35,.90,.90,.90,false);lid.rotation.z=Math.PI;lid.visible=false;lids.push(lid);
   }
-  for(const s of [-1,1]){const mouth=mesh(MOUTHG,a.ink,head,s*.019,-.155,.38,.8,.8,.8,false);mouth.rotation.z=Math.PI;}
+  for(const s of [-1,1]){const mouth=mesh(MOUTHG,a.ink,head,s*.019,-.14,.43,.8,.8,.8,false);mouth.rotation.z=Math.PI;}
   if(f.sp==='human'){
     ball(a.ink,head,0,.23,-.025,.425,.23,.34);
     for(const x of [-.24,-.08,.08,.24])ball(a.ink,head,x,.235,.27,.105,.10,.08,false);
@@ -95,8 +98,8 @@ function posePlushShiba(f,J,yaw,headYaw){
     }
     J=p.stanceJ;
   }
-  p.body.position.copy(J.pelvis).lerp(J.neck,.48);p.body.position.y-=.06;p.body.rotation.y=yaw;p.body.scale.set(.35*bulk,.40,.31*bulk);
-  p.head.position.copy(J.neck);p.head.position.y+=.18;p.head.rotation.y=headYaw;p.head.scale.setScalar(f.beastOn?1.05:1);
+  p.body.position.copy(J.pelvis).lerp(J.neck,.48);p.body.position.y-=.10;p.body.rotation.y=yaw;p.body.scale.set(.35*bulk,.40,.31*bulk);
+  p.head.position.copy(J.neck);p.head.position.y+=.22;p.head.rotation.y=headYaw;p.head.scale.setScalar(f.beastOn?1.05:1);
   for(let i=0;i<2;i++){
     const s=i===0?'L':'R',shoulder=J['s'+s],hand=J['h'+s],hip=J['hip'+s],foot=J['f'+s];
     const arm=p.arms[i],leg=p.legs[i];

@@ -72,7 +72,8 @@ window.__dbg.batterView=(team,k=0,beast=false,left=false,factor=null)=>{
   const head=rect(points),zone=rect([-1,1].flatMap(x=>[-1,1].map(y=>zoneToWorld(x,y).project(camera))));
   const plush=batterF.plush;
   const alignment=plush?{arm:Math.max(...plush.arms.map(m=>m.scale.y)),body:plush.body.scale.x,neck:Math.abs(plush.head.position.x-plush.stanceJ.neck.x),torso:Math.abs(plush.head.position.x-plush.body.position.x),grip:Math.max(plush.paws[0].position.distanceTo(J.hL),plush.paws[1].position.distanceTo(J.hR))}:null;
-  return {head,zone,alignment,scale:batterF.head.scale.x,gap:Math.max(zone.left-head.right,head.left-zone.right)};
+  const aim=zoneToWorld(0,0).project(camera);
+  return {head,zone,alignment,aim:{x:aim.x,y:aim.y},scale:batterF.head.scale.x,gap:Math.max(zone.left-head.right,head.left-zone.right)};
 };
 window.__dbg.renderOn=()=>{renderer.render=renderForReviewTest;};
 const reviewDrawForTest=renderReviewField;let holdReviewDrawForTest=false;
