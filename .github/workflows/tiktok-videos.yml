@@ -5,10 +5,6 @@ name: TikTok videos (weekly)
 # どこかの手順が失敗したら、そこで止まる（後の手順は実行しない）。
 # ゲーム本体はビルドして画面を撮るだけで、変更しない（docs/ には何も書かない）。
 on:
-  # 検証用（確認できたら外す）：このブランチへの push で、翌週分を1回作る
-  push:
-    branches: [claude/tiktok-videos]
-    paths: ['.github/workflows/tiktok-videos.yml']
   schedule:
     # 毎週 日曜 21:43（日本時間）＝ 日曜 12:43 UTC。翌週（月〜日）の分を作る
     - cron: '43 12 * * 0'
