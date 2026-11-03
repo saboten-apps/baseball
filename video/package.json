@@ -1,0 +1,31 @@
+{
+  "name": "doubutsu-baseball-shorts",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "どうぶつベースボールの宣伝用ショート動画（TikTok 縦 1080x1920）を毎週7本つくる",
+  "scripts": {
+    "data": "node scripts/extractGameData.ts",
+    "audio": "node scripts/synthAudio.ts",
+    "capture": "node scripts/captureScreens.ts",
+    "prepare-assets": "npm run data && npm run audio",
+    "studio": "remotion studio src/index.ts",
+    "render:week": "node scripts/renderWeek.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.539",
+    "@remotion/cli": "4.0.539",
+    "@remotion/renderer": "4.0.539",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.539"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.0",
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}

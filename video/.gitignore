@@ -1,0 +1,5 @@
+node_modules
+# 生成物（npm run prepare-assets / capture / render:week で作り直せる）
+public/generated
+src/generated
+out
