@@ -5,7 +5,7 @@
    outcome (double plays, errors, where the ball lands) comes out the same and the game state stays identical. */
 const SB_URL = 'https://qxtqaqcbhsekictbrdau.supabase.co';
 const SB_KEY = 'sb_publishable_4TJm2e-nlqVN-yFZ_LvZhw_BzoXYkyD';
-const PAGES_URL = 'https://saboten-apps.github.io/baseball/';
+const PAGES_URL = 'https://baseball.umimachilab.com/';
 let online = false;
 const onl = { sb: null, ch: null, code: '', side: 'home', me: Math.random().toString(36).slice(2, 10), started: false,
   score: { home: 0, away: 0 }, queued: null, waitRes: null, half: 1, joinTimer: 0, goneTimer: 0,
