@@ -1,0 +1,18 @@
+{
+  "_note": "動画で使う音声の出どころと使える範囲。commercialUse が true のものだけ、レンダリングに使える（scripts/renderWeek.ts が照合し、足りなければ止まる）。外部の素材を足すときは、規約を確認してから行を追加する。",
+  "files": {
+    "generated/audio/bgm_pop.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/bgm_tense.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/bgm_dreamy.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_pop.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_whoosh.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_ding.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_tick.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_drumroll.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_boom.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_sparkle.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_buzzer.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_coin.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_stamp.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" }
+  }
+}

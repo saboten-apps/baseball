@@ -1,0 +1,61 @@
+# TikTok 用ショート動画の自動生成（Remotion）
+
+「どうぶつベースボール」の宣伝用ショート動画を、**毎週7本**つくる仕組み。
+縦 1080×1920・30fps・H.264＋AAC・1本15〜30秒。**投稿はしない**（動画と投稿文を書き出すだけ）。
+
+ゲーム本体（`src/`・`docs/`）は**読むだけ**で、変更しない。このフォルダは、独立した npm プロジェクト（ゲームのビルド・`tools/check.mjs` の対象外）。
+
+## 7本の構成（すべて違う演出）
+
+| 型 | 中身 | 冒頭2秒のつかみ（例） | 使うゲームの情報 |
+|---|---|---|---|
+| TraitQuiz | どうぶつ固有スキルを出し「どのチーム？」→ 4択 → 3・2・1 → 正解 | このスキル、どのチームの？ | `TRAIT`（`07-roster.js`） |
+| PitchSpeedQuiz | 球種の最高球速を4択 → 正解 → 他の球種との速さ比べ | この球、最高何km/h？ | `TYPES`（`01-core.js`） |
+| RankingCountdown | 選手の能力値ランキング TOP3（パワー・ミート・走力・球速・変化を週ごとに交代）。1位は「？？？」からめくれる | 最強スラッガー TOP3 | `ROSTER`（`07-roster.js`） |
+| VersusDuel | 打者2人の能力値を並べ、3・2・1 のあとに総合力の勝者 | 打者対決！どっちが強い？ | `ROSTER` |
+| PitchShowcase | 球種が次々に飛び込み、最高球速の棒が伸びる | 変化球11種類 投げ分けろ！ | `TYPES` |
+| StoryTeaser | 序盤3話のタイトル・挿絵・導入文。最後は「？？？」で続きをゲームへ | 全10話のどうぶつ物語 | `STAGES`（`04-story-data.js`）・`docs/story` |
+| ScreenTour | 実際のゲーム画面（メニュー・チーム選び・試合中・ホームラン・ストーリー）をスマホの枠で紹介 | スマホで遊べる3D野球ゲーム | Playwright で撮ったゲーム画面 |
+
+- 題材は週ごとに回す（同じ題材は、候補を使い切るまで出ない）。曜日の並び・色・つかみの文も週ごとに変わる。同じ週なら、何度作っても同じ内容。
+- **ネタバレを避ける**：ストーリーは序盤3話だけ見せ、第4話以降は「？？？」。ストーリー専用のチーム（タイガーズ・スターズ）は、動画に出さない。クイズの投稿文に、答えは書かない。
+- テロップ：太字・太い縁取り・最小でも約46px（1080幅）。TikTok の上のタブ・下の説明文・右のボタンに隠れない範囲（`src/theme.ts` の `SAFE`）に置く。
+
+## 音（BGM・効果音）
+
+- すべて `scripts/synthAudio.ts` が**コードで合成した自作の音**（外部素材・外部APIなし）。
+- ゲーム本体の音は**使っていない**：効果音ラボの音は再配布禁止、BGM・実況は生成サービスの規約が別なので。使うなら、規約を確認してから `audio-licenses.json` に行を足し、`src/audio.ts` に加える。
+- 使える範囲は `audio-licenses.json` に記録する。レンダリングの前に、使う音がすべて `commercialUse: true` で記録されているか照合し、足りなければ**止まる**。
+
+## 手元で作る
+
+リポジトリ直下で `npm ci && node build.mjs && node tools/test/make-test-page.mjs`（画面の撮影に使う）。そのあと、このフォルダで：
+
+```bash
+npm ci
+npm run capture          # ゲーム画面を撮る（ヘッドレス Chrome。CHROME_PATH で場所を指定できる）
+npm run prepare-assets   # ゲームのデータ抽出・音の合成
+npm test                 # 計画のテスト（7本が違う構成・長さ・投稿文・クイズの正解・音のライセンス）
+npm run render:week -- --week 2026-W45            # 7本
+npm run render:week -- --week 2026-W45 --only 2   # 1本だけ
+npm run studio           # 画面で確認しながら直す（Remotion Studio）
+```
+
+- 出力：`out/<週>/NN-名前.mp4`（動画）・`.jpg`（表紙）・`.txt`（投稿文＋ハッシュタグ）、`posts.md`（7本の一覧と曜日）、`manifest.json`。
+- 1本でも失敗したら、そこで止まり、終了コード1になる。書き出した動画は ffprobe で、解像度・fps・長さ・音声の有無を確かめる。
+- ブラウザを取りに行けない環境では、`REMOTION_BROWSER_EXECUTABLE`（Remotion 用）で、手元の headless shell を指定する。
+- ゲームの定義（`TRAIT`・`TYPES`・`HAP`・`STAGES`・`ROSTER`）の書き方が変わると、`npm run data` が「どこが読めなかったか」を出して止まる。`scripts/extractGameData.ts` を直す。
+
+## GitHub Actions
+
+`.github/workflows/tiktok-videos.yml`
+
+- 自動：毎週日曜 21:43（日本時間）に、**翌週**の7本を作る。
+- 手動：Actions →「TikTok videos (weekly)」→ Run workflow。`week`（例 `2026-W45`）・`only`（例 `1,3`）を指定できる。
+- 結果：実行ページの Artifacts「tiktok-<週>」（30日保存）。投稿文は、実行ページの Summary にも出る。
+- ゲームの `check.yml`（main への push・PR）とは別。動画の生成は、本番（GitHub Pages）に影響しない。
+
+## 注意
+
+- Remotion は、個人・従業員3人以下の会社は無料で使える（それより大きい組織は有料のライセンスが必要）。
+- 動画の中の挿絵・ゲーム画面・マスコットは、ゲーム本体の素材（Take の提供・生成）。SNS の宣伝に使ってよいかは、素材ごとの規約を Take が確認する。
