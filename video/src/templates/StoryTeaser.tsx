@@ -26,12 +26,12 @@ const Scene: React.FC<{ ch: Chapter; palette: Palette }> = ({ ch, palette }) => 
   )
 }
 
-export const StoryTeaser: React.FC<VideoProps<'StoryTeaser'>> = ({ data, hook, palette }) => {
+export const StoryTeaser: React.FC<VideoProps<'StoryTeaser'>> = ({ data, hook, hookSub, hookBadge, hookArt, palette }) => {
   const p = paletteOf(palette)
   const hookF = sec(T.StoryTeaser.hook), chF = sec(T.StoryTeaser.chapter)
   return (
     <>
-      <Sequence durationInFrames={hookF}><Hook text={hook} palette={p} sub="ストーリーモード" /></Sequence>
+      <Sequence durationInFrames={hookF}><Hook text={hook} sub={hookSub} badge={hookBadge} art={hookArt} palette={p} /></Sequence>
       {data.chapters.map((ch, i) => (
         <Sequence key={ch.short} from={hookF + chF * i} durationInFrames={chF}><Scene ch={ch} palette={p} /></Sequence>
       ))}

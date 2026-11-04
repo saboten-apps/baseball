@@ -39,13 +39,13 @@ const Card: React.FC<{ item: Item; metric: string; flipAt: number; palette: Pale
   )
 }
 
-export const RankingCountdown: React.FC<VideoProps<'RankingCountdown'>> = ({ data, hook, palette }) => {
+export const RankingCountdown: React.FC<VideoProps<'RankingCountdown'>> = ({ data, hook, hookSub, hookBadge, hookArt, palette }) => {
   const p = paletteOf(palette)
   const t = T.RankingCountdown
   const hookF = sec(t.hook), itemF = sec(t.item)
   return (
     <>
-      <Sequence durationInFrames={hookF}><Hook text={hook} palette={p} sub={`能力値：${data.metric}`} /></Sequence>
+      <Sequence durationInFrames={hookF}><Hook text={hook} sub={hookSub} badge={hookBadge} art={hookArt} palette={p} /></Sequence>
       {data.items.map((it, i) => {
         const last = i === data.items.length - 1
         return (

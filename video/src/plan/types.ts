@@ -124,8 +124,14 @@ export type TemplateProps = {
 export interface CommonProps {
   durationInFrames: number
   bgm: string
-  /** 冒頭2秒のつかみ（テロップ） */
+  /** 冒頭3秒のつかみ（テロップ）。結末・意外な数字を先に出す。改行（\n）で2行まで、1行12字まで。クイズは答えを出さない */
   hook: string
+  /** つかみの補足（1行・16字まで） */
+  hookSub: string
+  /** つかみの大きな数字・名前（12字まで） */
+  hookBadge?: string
+  /** つかみに出す絵（staticFile のパス。ストーリーは序盤3話の絵だけ） */
+  hookArt?: string
   /** 色の組み合わせ（週ごとに変える） */
   palette: number
 }
@@ -139,7 +145,8 @@ export interface VideoSpec {
   /** 投稿の目安の曜日 */
   day: string
   props: VideoProps
-  post: { caption: string; hashtags: string[] }
+  /** title：結末・意外さを先に出す見出し。caption は、これで始まり、最後を質問で締める */
+  post: { title: string; caption: string; hashtags: string[] }
   /** この動画で使う音声（staticFile のパス）。ライセンスの確認に使う */
   audio: string[]
 }
