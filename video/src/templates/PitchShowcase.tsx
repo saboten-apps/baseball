@@ -34,14 +34,14 @@ const One: React.FC<{ pitch: PitchInfo; i: number; palette: Palette }> = ({ pitc
   )
 }
 
-export const PitchShowcase: React.FC<VideoProps<'PitchShowcase'>> = ({ data, hook, palette }) => {
+export const PitchShowcase: React.FC<VideoProps<'PitchShowcase'>> = ({ data, hook, hookSub, hookBadge, hookArt, palette }) => {
   const p = paletteOf(palette)
   const t = T.PitchShowcase
   const hookF = sec(t.hook), oneF = sec(t.pitch)
   const outro = hookF + oneF * data.pitches.length
   return (
     <>
-      <Sequence durationInFrames={hookF}><Hook text={hook} palette={p} sub="球速と球種" /></Sequence>
+      <Sequence durationInFrames={hookF}><Hook text={hook} sub={hookSub} badge={hookBadge} art={hookArt} palette={p} /></Sequence>
       {data.pitches.map((pi, i) => (
         <Sequence key={pi.id} from={hookF + oneF * i} durationInFrames={oneF}><One pitch={pi} i={i} palette={p} /></Sequence>
       ))}

@@ -19,12 +19,22 @@ export function rotate<T>(pool: string, items: readonly T[], weekIndex: number, 
 
 const grade = (n: number) => GRADE[Math.max(1, Math.min(7, n))]
 
+/** ネタバレになる言葉（ストーリー専用チーム・敵）。動画のどこにも出さない */
+export const SPOILER_WORDS = ['タイガーズ', 'スターズ', '宇宙人', 'エイリアン', 'alien', 'tiger']
+const hasSpoiler = (t: string) => SPOILER_WORDS.some((w) => t.includes(w))
+
 interface Built<K extends TemplateId> {
   data: TemplateProps[K]
   seconds: number
+  /** 冒頭3秒のつかみ。結果・意外な数字を先に出す（クイズは答えを出さない）。hookBadge は大きな数字・名前、hookSub は補足 */
   hook: string
+  hookSub: string
+  hookBadge?: string
+  hookArt?: string
   bgm: string
   slug: string
+  /** 投稿のタイトル（結果・意外さを先に出す）。caption はこれで始め、最後を質問で締める */
+  title: string
   caption: string
   tags: string[]
 }
@@ -49,13 +59,19 @@ const builders: { [K in TemplateId]: Builder<K> } = {
     const [answer] = rotate('trait', withTrait, w, 1)
     const others = shuffle(rng, withTrait.filter((t) => t.id !== answer.id)).slice(0, 3)
     const opts = shuffle(rng, [answer, ...others])
+    const n = withTrait.length
+    // 特性の名前は「猫の身のこなし」のように答えが分かってしまうので、つかみには出さない。数字（何チーム中1つ）だけ先に出す
+    const title = `全${n}チームで1つだけ！この固有スキルの持ち主は？`
     return {
       data: { trait: answer.trait as { name: string; desc: string }, options: opts.map((t) => ({ team: t.name, animal: t.animal })), answerIndex: opts.indexOf(answer) },
       seconds: T.TraitQuiz.hook + T.TraitQuiz.question + T.TraitQuiz.countdown + T.TraitQuiz.answer + END_CARD_SEC,
-      hook: pick(rng, ['このスキル、\nどのチームの？', 'どうぶつ固有スキル\n当てられる？', 'クイズ！\nこの特性の持ち主は？']),
+      hook: pick(rng, [`${n}チームで\n1つだけの特性`, 'この固有スキル、\n持ち主は誰？', '答えは1チーム\n当てられる？']),
+      hookBadge: `${n}チームに1つ`,
+      hookSub: 'どうぶつ固有スキルクイズ',
       bgm: BGM.pop,
       slug: 'trait-quiz',
-      caption: `Q.「${answer.trait?.desc}」──この特性を持つ、どうぶつチームは？ A〜Dで答えてね。正解は動画の最後に！`,
+      title,
+      caption: `${title}\n「${answer.trait?.desc}」──A〜Dで答えてね。正解は動画の最後に。わかる？`,
       tags: ['#クイズ', '#わかったらコメント', '#スマホゲーム'],
     }
   },
@@ -67,13 +83,19 @@ const builders: { [K in TemplateId]: Builder<K> } = {
     const wrong = shuffle(rng, [-24, -16, -8, 8, 16].map((o) => real + o)).filter((v) => v >= 60 && v <= 175).slice(0, 3)
     const opts = shuffle(rng, [real, ...wrong]).sort((a, b) => a - b)
     const others = rotate('speed-others', d.pitches.filter((p) => p.id !== pitch.id), w, 3)
+    // 最高球速（答え）は出さず、「同じ球でこれだけ速さが違う」という意外さだけ先に出す
+    const spread = pitch.max - pitch.min
+    const title = `同じ「${pitch.name}」でも球速が${spread}km/h違う！最高は何km/h？`
     return {
       data: { pitch, options: opts, answerIndex: opts.indexOf(real), others },
       seconds: T.PitchSpeedQuiz.hook + T.PitchSpeedQuiz.question + T.PitchSpeedQuiz.countdown + T.PitchSpeedQuiz.answer + T.PitchSpeedQuiz.compare + END_CARD_SEC,
-      hook: pick(rng, ['この球、\n最高何km/h？', '球速クイズ！\n何km/h出る？', '投げられる？\n最速の球は？']),
+      hook: pick(rng, ['同じ球なのに\n球速が全然違う', '投げ方ひとつで\nこんなに変わる', '最速と最遅\nこの差を見て']),
+      hookBadge: `差${spread}km/h`,
+      hookSub: `「${pitch.name}」の最高球速は？`,
       bgm: BGM.tense,
       slug: 'pitch-speed',
-      caption: `Q.「${pitch.name}」の最高球速は何km/h？ ゲームの中では全${d.counts.pitches}種類の球種を投げ分けられます。A〜Dで答えてね。`,
+      title,
+      caption: `${title}\nゲームの中では全${d.counts.pitches}種類の球種を投げ分けられます。A〜Dで答えてね。わかる？`,
       tags: ['#球速', '#変化球', '#野球好きと繋がりたい'],
     }
   },
@@ -92,13 +114,19 @@ const builders: { [K in TemplateId]: Builder<K> } = {
       if (top.length === 3) break
     }
     const items = [top[2], top[1], top[0]].map((p, i) => ({ rank: 3 - i, name: p.name, teamName: p.teamName, grade: grade(rankValue(r.key, p)), star: p.star }))
+    const best = top[0]
+    const title = `${r.title}の1位は「${best.name}」！`
     return {
       data: { title: r.title, metric: r.metric, items },
       seconds: T.RankingCountdown.hook + T.RankingCountdown.item * 2 + T.RankingCountdown.last + END_CARD_SEC,
-      hook: pick(rng, [`${r.title}\nTOP3`, `${r.title}は\n誰だ？`, `選手ランキング\n${r.title}`]),
+      // 1位の名前を先に出す（そのあと、3位→1位とめくる）
+      hook: pick(rng, [`${r.title}\n1位はこの選手`, `${r.title}は\nこの選手だ`]),
+      hookBadge: best.name,
+      hookSub: `${best.teamName}・${r.metric}${grade(rankValue(r.key, best))}`,
       bgm: BGM.tense,
       slug: 'ranking',
-      caption: `ゲームの能力値で決める「${r.title}」TOP3。1位は${top[0].teamName}のあの選手！ あなたの推しは入ってる？`,
+      title,
+      caption: `${title}\nゲームの能力値で決める「${r.title}」TOP3。2位は「${top[1].name}」、3位は「${top[2].name}」。あなたの推しは入ってる？`,
       tags: ['#ランキング', '#推し選手', '#野球ゲーム好きと繋がりたい'],
     }
   },
@@ -110,6 +138,8 @@ const builders: { [K in TemplateId]: Builder<K> } = {
     const rivals = bats.filter((p) => p.team !== a.team && p.name !== a.name && batScore(p) !== batScore(a))
     const [b] = rotate('duel-b', rivals, w, 1)
     const winner = batScore(a) > batScore(b) ? 'a' : 'b'
+    const win = winner === 'a' ? a : b, lose = winner === 'a' ? b : a
+    const title = `${win.name}が${lose.name}に勝つ！総合${batScore(win)}対${batScore(lose)}の決着`
     return {
       data: {
         a, b, winner,
@@ -120,37 +150,56 @@ const builders: { [K in TemplateId]: Builder<K> } = {
         ],
       },
       seconds: T.VersusDuel.hook + T.VersusDuel.intro + T.VersusDuel.stats + T.VersusDuel.countdown + T.VersusDuel.result + END_CARD_SEC,
-      hook: pick(rng, ['打者対決！\nどっちが強い？', 'ドリームマッチ\n強いのはどっち？', 'どうぶつ頂上決戦']),
+      // 勝者と点差を先に出す（そのあと、能力値を並べて確かめる）
+      hook: pick(rng, [`決着！勝つのは\n${win.name}`, `打者対決の勝者は\n${win.name}`]),
+      hookBadge: `総合 ${batScore(win)} 対 ${batScore(lose)}`,
+      hookSub: `${a.teamName} 対 ${b.teamName}`,
       bgm: BGM.pop,
       slug: 'versus',
-      caption: `${a.teamName}の${a.name} VS ${b.teamName}の${b.name}。打者としてどっちが強い？ コメントで予想してね！`,
+      title,
+      caption: `${title}\n${a.teamName}の${a.name} VS ${b.teamName}の${b.name}。ミートとパワーの合計で勝負。この結果、納得できる？`,
       tags: ['#対決', '#どっちが強い', '#野球ゲーム'],
     }
   },
 
   PitchShowcase: (d, w, rng) => {
     const pitches = rotate('showcase', d.pitches, w, 8)
+    const fastest = pitches.reduce((a, b) => (b.max > a.max ? b : a))
+    const title = `最速${fastest.max}km/hの「${fastest.name}」！変化球${d.counts.pitches}種類を投げ分けろ`
     return {
       data: { pitches, total: d.counts.pitches },
       seconds: T.PitchShowcase.hook + T.PitchShowcase.pitch * pitches.length + T.PitchShowcase.outro + END_CARD_SEC,
-      hook: pick(rng, [`変化球${d.counts.pitches}種類\n投げ分けろ！`, `${d.counts.pitches}種類の球種\n全部言える？`, '投げ方ひとつで\n球が変わる']),
+      hook: pick(rng, [`最速の球は\n${fastest.name}`, `この球が\n一番速い！`]),
+      hookBadge: `${fastest.max}km/h`,
+      hookSub: `全${d.counts.pitches}種類を投げ分け`,
       bgm: BGM.pop,
       slug: 'pitch-showcase',
-      caption: `ゲームには${d.counts.pitches}種類の球種。指を弾く向きで球種、離した位置でコース、速さで球速が決まります。いくつ知ってた？`,
+      title,
+      caption: `${title}。指を弾く向きで球種、離した位置でコース、速さで球速が決まります。いくつ知ってた？`,
       tags: ['#変化球', '#ピッチャー', '#野球好きな人と繋がりたい'],
     }
   },
 
-  StoryTeaser: (d, _w, rng) => {
-    const shown = d.stages.slice(0, 3).map((s) => ({ short: s.short, title: s.title, ...(s.art ? { art: s.art } : {}), line: s.intro, hidden: false }))
+  StoryTeaser: (d, w, rng) => {
+    // 導入文に、ストーリー専用の敵の名前（ネタバレ）が入っているときは、安全な一文に置き換える
+    const safeLine = (s: { title: string; intro: string }) => (hasSpoiler(s.intro) ? '物語は、ここから動き出す。' : s.intro)
+    const shown = d.stages.slice(0, 3).map((s) => ({ short: s.short, title: s.title, ...(s.art ? { art: s.art } : {}), line: safeLine(s), hidden: false }))
+    // 先出しする場面は、序盤3話（絵がある話）の中から週ごとに選ぶ
+    const lead = rotate('story-lead', shown.filter((c) => c.art), w, 1)[0]
+    const title = `${lead.short}「${lead.title}」──全${d.counts.stages}話のどうぶつ物語`
     const hidden = { short: `第4話〜第${d.counts.stages}話`, title: '？？？', line: '物語は、まだ始まったばかり。', hidden: true }
     return {
       data: { chapters: [...shown, hidden], total: d.counts.stages },
       seconds: T.StoryTeaser.hook + T.StoryTeaser.chapter * 4 + END_CARD_SEC,
-      hook: pick(rng, [`全${d.counts.stages}話の\nどうぶつ物語`, '野球の先に\n待っているのは…', 'ただの野球ゲーム\nじゃなかった']),
+      // 序盤の名場面とタイトルを先に出す（第4話以降は出さない）
+      hook: `${lead.short}\n${lead.title}`,
+      hookBadge: `全${d.counts.stages}話の物語`,
+      hookSub: pick(rng, ['ただの野球ゲームじゃない', '続きはゲームの中で']),
+      ...(lead.art ? { hookArt: lead.art } : {}),
       bgm: BGM.dreamy,
       slug: 'story',
-      caption: `野球をしながら、仲間と自分たちの秘密をたどる全${d.counts.stages}話のストーリー。第1話「${d.stages[0].title}」から無料で遊べます。続きはゲームで。`,
+      title,
+      caption: `${title}。野球をしながら、仲間と自分たちの秘密をたどるストーリー。第1話から無料で遊べます。続きが気になる？`,
       tags: ['#ストーリー', '#どうぶつ', '#無料ゲーム'],
     }
   },
@@ -158,13 +207,18 @@ const builders: { [K in TemplateId]: Builder<K> } = {
   ScreenTour: (d, _w, rng) => {
     const shots = d.screens.slice(0, 6)
     if (shots.length < 4) throw new Error('ゲーム画面の撮影が足りない（npm run capture を先に実行する）')
+    const { pitches, stages } = d.counts
+    const title = `変化球${pitches}種類×全${stages}話の物語！スマホで遊べる3D野球`
     return {
       data: { shots, counts: d.counts },
       seconds: T.ScreenTour.hook + T.ScreenTour.shot * shots.length + END_CARD_SEC,
-      hook: pick(rng, ['スマホで遊べる\n3D野球ゲーム', 'ブラウザで今すぐ\nプレイボール', 'インストール不要の\n野球アクション']),
+      hook: pick(rng, [`${pitches}種類の変化球\n全${stages}話の物語`, `${d.counts.teams}チームの3D野球\n${pitches}種類の変化球`]),
+      hookBadge: `${pitches}種類`,
+      hookSub: '実際のゲーム画面',
       bgm: BGM.pop,
       slug: 'screen-tour',
-      caption: `打つ・投げる・作戦まで、スマホで遊べる3D野球アクション。CPU対戦もオンライン対戦もストーリーも、ブラウザで無料です。`,
+      title,
+      caption: `${title}\n打つ・投げる・作戦まで。CPU対戦もオンライン対戦もストーリーも、ブラウザで無料です。あなたはどのチームで戦う？`,
       tags: ['#ゲーム紹介', '#無料ゲーム', '#スマホゲーム'],
     }
   },
@@ -179,7 +233,7 @@ export function buildWeekPlan(data: GameData, weekId: string): VideoSpec[] {
   return order.map((template, i) => {
     const b = (builders[template] as Builder<TemplateId>)(data, w, makeRng(hashString(`${weekId}:${template}`) ^ Math.floor(rng() * 1e9)))
     if (b.seconds < MIN_SEC || b.seconds > MAX_SEC) throw new Error(`${template} の長さ ${b.seconds} 秒が、${MIN_SEC}〜${MAX_SEC} 秒の外`)
-    const props: VideoProps = { template, data: b.data, durationInFrames: sec(b.seconds), bgm: b.bgm, hook: b.hook, palette: (week + i) % PALETTE_COUNT }
+    const props: VideoProps = { template, data: b.data, durationInFrames: sec(b.seconds), bgm: b.bgm, hook: b.hook, hookSub: b.hookSub, ...(b.hookBadge ? { hookBadge: b.hookBadge } : {}), ...(b.hookArt ? { hookArt: b.hookArt } : {}), palette: (week + i) % PALETTE_COUNT }
     const hashtags = [...BASE_TAGS, ...b.tags.filter((t) => !BASE_TAGS.includes(t))].slice(0, 6)
     return {
       index: i + 1,
@@ -187,7 +241,7 @@ export function buildWeekPlan(data: GameData, weekId: string): VideoSpec[] {
       template,
       day: DAYS[i],
       props,
-      post: { caption: b.caption, hashtags },
+      post: { title: b.title, caption: b.caption, hashtags },
       audio: [b.bgm, ...[...TEMPLATE_SFX.common, ...TEMPLATE_SFX[template]].map((s) => SFX[s])],
     }
   })

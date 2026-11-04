@@ -109,14 +109,14 @@ async function main() {
 
   const md = [`# ${week} の投稿（${results.length}本）`, '', 'TikTok への投稿は手動で行う。各動画の投稿文は、同じ名前の .txt にもある。', '']
   for (const r of results) {
-    md.push(`## ${r.spec.day}曜日：${path.basename(r.file)}（${r.seconds.toFixed(1)}秒・${r.spec.template}）`, '', `つかみ：${r.spec.props.hook.replace(/\n/g, '')}`, '', '```', postText(r.spec).trim(), '```', '')
+    md.push(`## ${r.spec.day}曜日：${path.basename(r.file)}（${r.seconds.toFixed(1)}秒・${r.spec.template}）`, '', `タイトル：${r.spec.post.title}`, '', `つかみ：${r.spec.props.hook.replace(/\n/g, '')}（${[r.spec.props.hookBadge, r.spec.props.hookSub].filter(Boolean).join(' / ')}）`, '', '```', postText(r.spec).trim(), '```', '')
   }
   fs.writeFileSync(path.join(outDir, 'posts.md'), md.join('\n'))
   fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify({
     week,
     videos: results.map((r) => ({
       index: r.spec.index, day: r.spec.day, template: r.spec.template, file: path.basename(r.file), seconds: Number(r.seconds.toFixed(2)),
-      hook: r.spec.props.hook.replace(/\n/g, ''), caption: r.spec.post.caption, hashtags: r.spec.post.hashtags, audio: r.spec.audio,
+      hook: r.spec.props.hook.replace(/\n/g, ''), hookBadge: r.spec.props.hookBadge, hookSub: r.spec.props.hookSub, title: r.spec.post.title, caption: r.spec.post.caption, hashtags: r.spec.post.hashtags, audio: r.spec.audio,
     })),
   }, null, 2))
   console.log(`完了：${results.length} 本（${path.join(outDir, 'posts.md')}）`)

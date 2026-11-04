@@ -6,14 +6,14 @@ import { T, sec } from '../plan/timing.ts'
 import type { VideoProps } from '../plan/types.ts'
 import { paletteOf } from '../theme.ts'
 
-export const TraitQuiz: React.FC<VideoProps<'TraitQuiz'>> = ({ data, hook, palette }) => {
+export const TraitQuiz: React.FC<VideoProps<'TraitQuiz'>> = ({ data, hook, hookSub, hookBadge, hookArt, palette }) => {
   const p = paletteOf(palette)
   const t = T.TraitQuiz
   const a = sec(t.hook), b = a + sec(t.question + t.countdown), c = b + sec(t.answer)
   const options = data.options.map((o) => ({ main: o.team, sub: o.animal }))
   return (
     <>
-      <Sequence durationInFrames={a}><Hook text={hook} palette={p} sub="どうぶつ固有スキル" /></Sequence>
+      <Sequence durationInFrames={a}><Hook text={hook} sub={hookSub} badge={hookBadge} art={hookArt} palette={p} /></Sequence>
       <Sequence from={a} durationInFrames={b - a}>
         <Safe gap={28}>
           <Caption size={56}>{data.trait.desc}</Caption>

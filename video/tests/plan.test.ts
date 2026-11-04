@@ -2,8 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { BGM, SFX } from '../src/audio.ts'
-import { BASE_TAGS, buildWeekPlan, rotate } from '../src/plan/buildPlan.ts'
-import { FPS, MAX_SEC, MIN_SEC } from '../src/plan/timing.ts'
+import { BASE_TAGS, SPOILER_WORDS, buildWeekPlan, rotate } from '../src/plan/buildPlan.ts'
+import { FPS, HOOK_SEC, MAX_SEC, MIN_SEC, T } from '../src/plan/timing.ts'
 import { TEMPLATE_IDS, type GameData } from '../src/plan/types.ts'
 import { isoWeekId, parseWeekId } from '../src/plan/week.ts'
 import { checkAudioLicenses } from '../scripts/renderWeek.ts'
@@ -132,5 +132,121 @@ describe('部品', () => {
   })
   it('全テンプレートが揃っている', () => {
     expect(TEMPLATE_IDS).toHaveLength(7)
+  })
+})
+
+describe('冒頭3秒の結果先出し（つかみ）', () => {
+  const lines = (x: string) => x.split('\n')
+  const weeks = Array.from({ length: 52 }, (_, i) => `2027-W${String(i + 1).padStart(2, '0')}`)
+  const all = weeks.flatMap((w) => buildWeekPlan(data, w))
+  const texts = (x: (typeof all)[number]) => [x.props.hook, x.props.hookBadge ?? '', x.props.hookSub, x.post.title, x.post.caption]
+
+  it('つかみは字幕として読める長さ（見出し2行・1行12字／数字・名前12字／補足16字まで）', () => {
+    for (const s of all) {
+      const { hook, hookSub, hookBadge } = s.props
+      expect(lines(hook).length, hook).toBeLessThanOrEqual(2)
+      for (const l of lines(hook)) expect([...l].length, `${s.template}: ${hook}`).toBeLessThanOrEqual(12)
+      expect([...hookSub].length, `${s.template}: ${hookSub}`).toBeGreaterThan(0)
+      expect([...hookSub].length, `${s.template}: ${hookSub}`).toBeLessThanOrEqual(16)
+      if (hookBadge) expect([...hookBadge].length, `${s.template}: ${hookBadge}`).toBeLessThanOrEqual(12)
+    }
+  })
+
+  it('つかみは全形式3秒で、尺は15〜30秒のまま', () => {
+    for (const t of Object.values(T)) expect(t.hook).toBe(HOOK_SEC)
+    for (const s of all) {
+      expect(s.props.durationInFrames / FPS).toBeGreaterThanOrEqual(MIN_SEC)
+      expect(s.props.durationInFrames / FPS).toBeLessThanOrEqual(MAX_SEC)
+    }
+  })
+
+  it('52週とも、7本・7形式で、週次の仕組みは変わらない', () => {
+    for (const w of weeks) {
+      const plan = buildWeekPlan(data, w)
+      expect(plan).toHaveLength(7)
+      expect(new Set(plan.map((s) => s.template)).size).toBe(7)
+    }
+  })
+
+  it('形式ごとに、結果・意外な数字がつかみに入っている', () => {
+    for (const s of all) {
+      const d = s.props.data as never as Record<string, any>
+      const text = [s.props.hook, s.props.hookBadge ?? '', s.props.hookSub].join(' ')
+      switch (s.template) {
+        case 'TraitQuiz': expect(s.props.hookBadge).toMatch(/^\d+チームに1つ$/); break
+        case 'PitchSpeedQuiz': expect(s.props.hookBadge).toBe(`差${d.pitch.max - d.pitch.min}km/h`); break
+        case 'RankingCountdown': expect(s.props.hookBadge).toBe(d.items[2].name); break
+        case 'VersusDuel': {
+          const win = d.winner === 'a' ? d.a : d.b
+          expect(s.props.hook).toContain(win.name)
+          expect(s.props.hookBadge).toMatch(/^総合 \d+ 対 \d+$/)
+          break
+        }
+        case 'PitchShowcase': {
+          const fastest = Math.max(...d.pitches.map((p: { max: number }) => p.max))
+          expect(s.props.hookBadge).toBe(`${fastest}km/h`)
+          break
+        }
+        case 'StoryTeaser': expect(text).toMatch(/第[1-3]話/); expect(s.props.hookArt).toBeTruthy(); break
+        case 'ScreenTour': expect(text).toContain(String(data.counts.pitches)); break
+      }
+    }
+  })
+
+  it('クイズは答えを出さない（つかみ・タイトル・投稿文に、正解のチーム／特性名／最高球速がない）', () => {
+    for (const s of all) {
+      if (s.template === 'TraitQuiz') {
+        const d = s.props.data as { trait: { name: string }; options: { team: string; animal: string }[]; answerIndex: number }
+        const a = d.options[d.answerIndex]
+        for (const t of texts(s)) {
+          expect(t).not.toContain(d.trait.name)
+          expect(t).not.toContain(a.team)
+          expect(t).not.toContain(a.animal)
+        }
+      }
+      if (s.template === 'PitchSpeedQuiz') {
+        const d = s.props.data as { pitch: { max: number }; options: number[]; answerIndex: number }
+        for (const t of texts(s)) {
+          expect(t).not.toContain(`${d.pitch.max}km`)
+          expect(t).not.toContain(`${d.options[d.answerIndex]}km`)
+        }
+      }
+    }
+  })
+
+  it('投稿は、結果・意外さを先に出すタイトルで始まり、最後は質問で締める', () => {
+    for (const s of all) {
+      expect([...s.post.title].length, s.post.title).toBeGreaterThan(8)
+      expect([...s.post.title].length, s.post.title).toBeLessThanOrEqual(60)
+      expect(s.post.caption.startsWith(s.post.title), s.post.caption).toBe(true)
+      expect(s.post.caption.trimEnd().endsWith('？'), s.post.caption).toBe(true)
+    }
+  })
+
+  it('タイトルが、つかみと同じ結果を含む', () => {
+    for (const s of all) {
+      const d = s.props.data as never as Record<string, any>
+      if (s.template === 'PitchSpeedQuiz') expect(s.post.title).toContain(`${d.pitch.max - d.pitch.min}km/h`)
+      if (s.template === 'RankingCountdown') expect(s.post.title).toContain(d.items[2].name)
+      if (s.template === 'VersusDuel') expect(s.post.title).toContain(s.props.hookBadge?.replace('総合 ', '総合').replace(' 対 ', '対'))
+      if (s.template === 'PitchShowcase') expect(s.post.title).toContain(s.props.hookBadge as string)
+    }
+  })
+
+  it('ネタバレを出さない（ストーリーは序盤3話だけ・タイガーズ／スターズ等の言葉は、どこにも出ない）', () => {
+    for (const s of all) {
+      const json = JSON.stringify([s.props, s.post])
+      for (const w of SPOILER_WORDS) expect(json, `${s.template}: ${w}`).not.toContain(w)
+      if (s.template === 'StoryTeaser') {
+        const d = s.props.data as { chapters: { short: string; hidden: boolean; art?: string }[] }
+        expect(d.chapters.filter((c) => !c.hidden).map((c) => c.short)).toEqual(['第1話', '第2話', '第3話'])
+        expect(d.chapters.filter((c) => c.art).length).toBeLessThanOrEqual(3)
+        for (const x of data.stages.slice(3)) expect(json).not.toContain(x.title)
+      }
+    }
+  })
+
+  it('同じ週なら何度作っても同じ内容', () => {
+    expect(JSON.stringify(buildWeekPlan(data, '2027-W10'))).toBe(JSON.stringify(buildWeekPlan(data, '2027-W10')))
   })
 })

@@ -78,26 +78,34 @@ export const Sfx: React.FC<{ name: SfxName; at: number; volume?: number }> = ({ 
   </Sequence>
 )
 
-/** 冒頭のつかみ：1コマ目から文字が見え、はじけて揺れる */
-export const Hook: React.FC<{ text: string; palette: Palette; sub?: string }> = ({ text, palette, sub }) => {
+/**
+ * 冒頭3秒のつかみ：結末・意外な数字を、1コマ目から見せる。
+ * 見出し（text）→ 大きな数字・名前（badge）→ 補足（sub）→ 絵（art）の順に、縦に並べる。
+ * 文字数の上限（見出し：2行・1行12字／badge：12字／sub：16字）は、tests/plan.test.ts が見張る。
+ */
+export const Hook: React.FC<{ text: string; palette: Palette; sub?: string; badge?: string; art?: string }> = ({ text, palette, sub, badge, art }) => {
   const f = useCurrentFrame()
   const { fps } = useVideoConfig()
   const s = spring({ frame: f, fps, config: { damping: 9, stiffness: 220 }, from: 1.12, to: 1 })
   const shake = f < 10 ? Math.sin(f * 2.4) * (10 - f) * 1.2 : 0
-  // 改行（\n）で区切った、いちばん長い行が、安全な範囲の幅（約860px）に1行で収まる大きさにする
+  // 改行（\n）で区切った、いちばん長い行が、安全な範囲の幅（約860px）に1行で収まる大きさにする。絵があるときは少し小さくして縦に収める
   const longest = Math.max(...text.split('\n').map((l) => [...l].length))
-  const size = Math.min(130, Math.floor(860 / longest))
+  const size = Math.min(art ? 104 : 124, Math.floor(860 / longest))
+  const badgeSize = badge ? Math.min(art ? 112 : 140, Math.floor(860 / [...badge].length)) : 0
   return (
     <AbsoluteFill>
       <AbsoluteFill style={{ background: `repeating-conic-gradient(from ${f * 2}deg at 50% 45%, rgba(255,255,255,0.16) 0deg 10deg, transparent 10deg 20deg)` }} />
-      <Safe>
+      <Safe gap={art ? 24 : 34}>
         <div style={{ maxWidth: 860, transform: `scale(${s}) rotate(${-3 + shake * 0.2}deg) translateX(${shake}px)` }}>
           <Telop size={size} color={palette.accent} stroke={palette.ink} pop={false} style={{ whiteSpace: 'pre-line' }}>{text}</Telop>
         </div>
-        {sub ? <Telop size={60} delay={8}>{sub}</Telop> : null}
+        {badge ? <Telop size={badgeSize} color="#fff" stroke={palette.accent2} delay={3} style={{ maxWidth: 900 }}>{badge}</Telop> : null}
+        {sub ? <Telop size={58} delay={8}>{sub}</Telop> : null}
+        {art ? <Picture src={art} width={540} height={356} /> : null}
       </Safe>
       <Sfx name="whoosh" at={0} />
       <Sfx name="pop" at={2} />
+      <Sfx name="ding" at={6} volume={0.6} />
     </AbsoluteFill>
   )
 }
