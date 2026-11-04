@@ -34,14 +34,14 @@ const Compare: React.FC<{ data: PitchSpeedQuizProps; palette: Palette }> = ({ da
   )
 }
 
-export const PitchSpeedQuiz: React.FC<VideoProps<'PitchSpeedQuiz'>> = ({ data, hook, palette }) => {
+export const PitchSpeedQuiz: React.FC<VideoProps<'PitchSpeedQuiz'>> = ({ data, hook, hookSub, hookBadge, hookArt, palette }) => {
   const p = paletteOf(palette)
   const t = T.PitchSpeedQuiz
   const a = sec(t.hook), b = a + sec(t.question + t.countdown), c = b + sec(t.answer)
   const options = data.options.map((v) => ({ main: `${v}km/h` }))
   return (
     <>
-      <Sequence durationInFrames={a}><Hook text={hook} palette={p} sub="球速クイズ" /></Sequence>
+      <Sequence durationInFrames={a}><Hook text={hook} sub={hookSub} badge={hookBadge} art={hookArt} palette={p} /></Sequence>
       <Sequence from={a} durationInFrames={b - a}>
         <Safe gap={30}>
           <Telop size={112} color={p.accent} stroke={p.ink}>{data.pitch.name}</Telop>

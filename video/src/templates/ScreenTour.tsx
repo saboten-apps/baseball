@@ -33,7 +33,7 @@ const Montage: React.FC<{ shots: ScreenShot[] }> = ({ shots }) => {
   const f = useCurrentFrame()
   const shot = shots[Math.floor(f / 6) % shots.length]
   return (
-    <AbsoluteFill style={{ opacity: 0.55 }}>
+    <AbsoluteFill style={{ opacity: 0.28 }}>
       <Img src={staticFile(shot.src)} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(2px)' }} />
     </AbsoluteFill>
   )
@@ -55,7 +55,7 @@ const Shot: React.FC<{ shot: ScreenShot; i: number; counts: ScreenTourProps['cou
   )
 }
 
-export const ScreenTour: React.FC<VideoProps<'ScreenTour'>> = ({ data, hook, palette }) => {
+export const ScreenTour: React.FC<VideoProps<'ScreenTour'>> = ({ data, hook, hookSub, hookBadge, hookArt, palette }) => {
   const p = paletteOf(palette)
   const hookF = sec(T.ScreenTour.hook)
   const shotF = sec(T.ScreenTour.shot)
@@ -63,7 +63,7 @@ export const ScreenTour: React.FC<VideoProps<'ScreenTour'>> = ({ data, hook, pal
     <>
       <Sequence durationInFrames={hookF}>
         <Montage shots={data.shots} />
-        <Hook text={hook} palette={p} sub="実際のゲーム画面" />
+        <Hook text={hook} sub={hookSub} badge={hookBadge} art={hookArt} palette={p} />
       </Sequence>
       {data.shots.map((s, i) => (
         <Sequence key={s.key} from={hookF + shotF * i} durationInFrames={shotF}>

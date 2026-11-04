@@ -60,13 +60,13 @@ const Result: React.FC<{ data: VideoProps<'VersusDuel'>['data']; palette: Palett
   )
 }
 
-export const VersusDuel: React.FC<VideoProps<'VersusDuel'>> = ({ data, hook, palette }) => {
+export const VersusDuel: React.FC<VideoProps<'VersusDuel'>> = ({ data, hook, hookSub, hookBadge, hookArt, palette }) => {
   const p = paletteOf(palette)
   const t = T.VersusDuel
   const a = sec(t.hook), b = a + sec(t.intro), c = b + sec(t.stats), d = c + sec(t.countdown)
   return (
     <>
-      <Sequence durationInFrames={a}><Hook text={hook} palette={p} /></Sequence>
+      <Sequence durationInFrames={a}><Hook text={hook} sub={hookSub} badge={hookBadge} art={hookArt} palette={p} /></Sequence>
       <Sequence from={a} durationInFrames={b - a}>
         <Safe gap={50}>
           <div style={{ display: 'flex', gap: 24, width: 880 }}>
