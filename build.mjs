@@ -39,14 +39,14 @@ const standalone = `<!doctype html>
 <meta property="og:site_name" content="どうぶつベースボール">
 <meta property="og:title" content="どうぶつベースボール - みんなで遊べる3D野球">
 <meta property="og:description" content="スマホで遊べる3D野球。招待リンクで友達とネット対戦もできます。無料。">
-<meta property="og:url" content="https://saboten-apps.github.io/baseball/">
-<meta property="og:image" content="https://saboten-apps.github.io/baseball/icons/ogp.png">
+<meta property="og:url" content="https://baseball.umimachilab.com/">
+<meta property="og:image" content="https://baseball.umimachilab.com/icons/ogp.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="どうぶつベースボール - みんなで遊べる3D野球">
 <meta name="twitter:description" content="スマホで遊べる3D野球。招待リンクで友達とネット対戦もできます。無料。">
-<meta name="twitter:image" content="https://saboten-apps.github.io/baseball/icons/ogp.png">
+<meta name="twitter:image" content="https://baseball.umimachilab.com/icons/ogp.png">
 <title>どうぶつベースボール</title>
 <link rel="stylesheet" href="${FONTS}">
 <style>
