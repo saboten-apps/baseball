@@ -7,7 +7,7 @@
 //   --only：作る動画の番号（1〜7）。確認用
 //   環境変数 REMOTION_BROWSER_EXECUTABLE：Remotion が使う Chrome（指定しなければ Remotion が用意する）
 // 出力：<out>/NN-名前.mp4・.jpg（表紙）・.txt（投稿文）、posts.md（一覧）、manifest.json
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { parseArgs } from 'node:util'
@@ -20,6 +20,9 @@ import { isoWeekId, parseWeekId } from '../src/plan/week.ts'
 
 const VIDEO = path.join(import.meta.dirname, '..')
 const PUBLIC = path.join(VIDEO, 'public')
+
+/** 書き出した音の最大音量の上限（dB）。これを超えたら、割れるおそれがあるので止める */
+export const MAX_PEAK_DB = -0.3
 
 interface License { source: string; license: string; commercialUse: boolean; checked: string }
 
@@ -47,7 +50,14 @@ function verifyVideo(file: string, expectedSec: number) {
   if (v?.r_frame_rate !== `${FPS}/1`) errors.push(`フレームレートが ${v?.r_frame_rate}（${FPS}/1 のはず）`)
   if (!a) errors.push('音声がない')
   if (!(dur >= MIN_SEC && dur <= MAX_SEC + 0.5) || Math.abs(dur - expectedSec) > 0.5) errors.push(`長さが ${dur.toFixed(2)} 秒（${expectedSec} 秒のはず・${MIN_SEC}〜${MAX_SEC} 秒）`)
+  // 音が割れていないか：書き出した動画の最大音量が、0dB（割れる）に近すぎない
+  const vd = spawnSync(process.env.FFMPEG || 'ffmpeg', ['-hide_banner', '-nostats', '-i', file, '-vn', '-af', 'volumedetect', '-f', 'null', '-'], { encoding: 'utf8' })
+  const maxVol = /max_volume:\s*(-?[\d.]+) dB/.exec(vd.stderr ?? '')
+  const meanVol = /mean_volume:\s*(-?[\d.]+) dB/.exec(vd.stderr ?? '')
+  if (!maxVol) errors.push('音量を測れなかった（ffmpeg の volumedetect）')
+  else if (Number(maxVol[1]) > MAX_PEAK_DB) errors.push(`音が割れそう：最大音量 ${maxVol[1]}dB（${MAX_PEAK_DB}dB 以下のはず）`)
   if (errors.length) throw new Error(`${path.basename(file)} の確認に失敗: ${errors.join(' / ')}`)
+  if (maxVol && meanVol) console.log(`  音量：最大 ${maxVol[1]}dB・平均 ${meanVol[1]}dB`)
   return dur
 }
 

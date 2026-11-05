@@ -1,7 +1,7 @@
 // 構成⑥：ストーリーの予告。序盤3話のタイトルと挿絵を見せ、最後は「？？？」で続きをゲームへ誘う（ネタバレしない）
 import type React from 'react'
 import { Sequence, interpolate, useCurrentFrame } from 'remotion'
-import { Caption, Hook, Picture, Safe, Sfx, Telop } from '../components/parts.tsx'
+import { Caption, Hook, Picture, Safe, Telop } from '../components/parts.tsx'
 import { T, sec } from '../plan/timing.ts'
 import type { VideoProps } from '../plan/types.ts'
 import { FONT, paletteOf, type Palette } from '../theme.ts'
@@ -21,7 +21,6 @@ const Scene: React.FC<{ ch: Chapter; palette: Palette }> = ({ ch, palette }) => 
       )}
       <Telop size={[...ch.title].length > 8 ? 76 : 96} delay={4}>{ch.title}</Telop>
       <Caption size={46} delay={10}>{ch.line}</Caption>
-      <Sfx name={ch.hidden ? 'ding' : 'whoosh'} at={0} volume={0.7} />
     </Safe>
   )
 }

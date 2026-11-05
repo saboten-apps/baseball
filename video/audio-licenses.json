@@ -13,6 +13,18 @@
     "generated/audio/sfx_sparkle.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
     "generated/audio/sfx_buzzer.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
     "generated/audio/sfx_coin.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
-    "generated/audio/sfx_stamp.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" }
+    "generated/audio/sfx_stamp.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-10-31" },
+    "generated/audio/sfx_crack.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_fanfare.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_winner.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_homerun.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_jackpot.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_zuko.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_blip.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_rise_1.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_rise_2.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_rise_3.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_rise_4.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" },
+    "generated/audio/sfx_rise_5.wav": { "source": "video/scripts/synthAudio.ts でコードから合成（自作・外部素材なし）", "license": "リポジトリ作者に帰属", "commercialUse": true, "checked": "2026-11-05" }
   }
 }

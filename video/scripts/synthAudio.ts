@@ -162,6 +162,68 @@ function sfx(seconds: number, draw: (b: Buf, rng: () => number) => void, seed: n
   return master(b, 0.9)
 }
 
+// ---- ご褒美・緊張・落差の音（パチンコ／ガチャ型：期待→緊張→報酬）。すべてコード合成のオリジナル ----
+
+/** バットの快音：硬い破裂音＋木の胴鳴り＋高い余韻 */
+function crackAt(b: Buf, t: number, rng: () => number, vol = 1) {
+  noise(b, t, 0.09, rng, { vol: 0.9 * vol, decay: 70, lowpass: 0.95 })
+  tone(b, t, 0.04, 950, { wave: 'sine', vol: 0.7 * vol, slide: -0.7, release: 0.1 })
+  tone(b, t, 0.02, 2300, { wave: 'sine', vol: 0.3 * vol, release: 0.22 })
+  kick(b, t, 0.55 * vol)
+}
+
+/** ファンファーレ風アルペジオ（ド・ミ・ソ・高いド・高いミ → 和音を伸ばす） */
+function fanfareAt(b: Buf, t: number, vol = 1, lift = 0) {
+  ;[72, 76, 79, 84, 88].forEach((n, i) => tone(b, t + i * 0.085, 0.09, midi(n + lift), { wave: 'square', vol: 0.2 * vol, release: 0.06 }))
+  const t1 = t + 5 * 0.085
+  ;[84, 88, 91, 96].forEach((n) => tone(b, t1, 0.55, midi(n + lift), { wave: 'saw', vol: 0.11 * vol, attack: 0.01, release: 0.45, vibrato: 0.004 }))
+}
+
+/** 歓声っぽいノイズ（帯域を絞ったノイズが、ふくらんで消える） */
+function cheerAt(b: Buf, t: number, dur: number, rng: () => number, vol = 1) {
+  const s0 = Math.floor(t * RATE)
+  const n = Math.floor(dur * RATE)
+  let a = 0, c = 0, wob = 0
+  for (let i = 0; i < n && s0 + i < b.length; i++) {
+    const x = i / RATE
+    const white = rng() * 2 - 1
+    a += (white - a) * 0.28
+    c += (white - c) * 0.035
+    wob += ((rng() * 2 - 1) - wob) * 0.0008
+    const env = Math.pow(Math.sin(Math.PI * Math.min(1, x / dur)), 1.4) * (0.75 + 2.5 * wob)
+    b[s0 + i] += (a - c) * 1.6 * env * 0.5 * vol
+  }
+}
+
+/** キラキラした高い音のならび */
+function sparkleAt(b: Buf, t: number, notes: number[], step = 0.05, vol = 1) {
+  notes.forEach((n, i) => tone(b, t + i * step, 0.04, midi(n), { wave: 'sine', vol: 0.3 * vol, release: 0.35 }))
+}
+
+/** 「ズコッ」：音程がずるっと落ちて、コッと止まる */
+function zukoAt(b: Buf, t: number, rng: () => number, vol = 1) {
+  const s0 = Math.floor(t * RATE)
+  const dur = 0.34
+  let phase = 0
+  for (let i = 0; i < dur * RATE && s0 + i < b.length; i++) {
+    const x = i / RATE
+    phase += 560 * Math.pow(85 / 560, x / dur) / RATE
+    const env = Math.min(1, x / 0.01) * Math.exp(-3.2 * x)
+    b[s0 + i] += (osc('saw', phase) * 0.6 + osc('tri', phase * 0.5) * 0.4) * env * 0.5 * vol
+  }
+  kick(b, t + 0.36, 0.7 * vol)
+  noise(b, t + 0.36, 0.08, rng, { vol: 0.35 * vol, decay: 50, lowpass: 0.4 })
+}
+
+/** 報酬の音：段階が上がるほど高い鐘（ド・レ・ミ・ソ・ラ） */
+const RISE_NOTES = [84, 86, 88, 91, 93]
+function riseAt(b: Buf, level: number) {
+  const n = RISE_NOTES[level - 1]
+  tone(b, 0, 0.03, midi(n), { wave: 'sine', vol: 0.6, release: 0.42 })
+  tone(b, 0, 0.03, midi(n + 12), { wave: 'sine', vol: 0.22, release: 0.3 })
+  tone(b, 0.045, 0.03, midi(n + 7), { wave: 'sine', vol: 0.28, release: 0.3 })
+}
+
 const effects: Record<string, Buf> = {
   sfx_pop: sfx(0.25, (b) => tone(b, 0, 0.06, 520, { wave: 'sine', vol: 0.8, slide: 1.4, release: 0.1 }), 1),
   sfx_whoosh: sfx(0.5, (b, r) => {
@@ -190,6 +252,38 @@ const effects: Record<string, Buf> = {
     tone(b, 0.07, 0.3, midi(88), { wave: 'square', vol: 0.35, release: 0.2 })
   }, 9),
   sfx_stamp: sfx(0.6, (b, r) => { kick(b, 0, 0.9); noise(b, 0, 0.12, r, { vol: 0.6, decay: 30, lowpass: 0.3 }) }, 10),
+  sfx_crack: sfx(0.7, (b, r) => crackAt(b, 0, r), 11),
+  sfx_fanfare: sfx(1.6, (b) => fanfareAt(b, 0), 12),
+  // 正解・勝者・1位の発表：快音＋ファンファーレ＋キラキラ
+  sfx_winner: sfx(1.8, (b, r) => { crackAt(b, 0, r, 0.9); fanfareAt(b, 0.12, 0.9); sparkleAt(b, 0.55, [84, 88, 91, 96, 100], 0.06, 0.8) }, 13),
+  // ホームラン：快音＋歓声＋ファンファーレ＋キラキラ（本編でいちばん大きなご褒美）
+  sfx_homerun: sfx(3.2, (b, r) => {
+    crackAt(b, 0, r, 1)
+    kick(b, 0.3, 0.7)
+    cheerAt(b, 0.15, 2.9, r, 1)
+    fanfareAt(b, 0.35, 1)
+    sparkleAt(b, 0.95, [84, 88, 91, 96, 100, 103, 108], 0.07, 0.9)
+  }, 14),
+  // 最後の大当たり：ホームラン＋もう1段高いファンファーレ＋キラキラの連打（動画でいちばん大きな音）
+  sfx_jackpot: sfx(3.5, (b, r) => {
+    kick(b, 0, 0.7)
+    crackAt(b, 0.02, r, 0.55)
+    cheerAt(b, 0.05, 3.3, r, 2.2)
+    fanfareAt(b, 0.1, 1.4)
+    fanfareAt(b, 1.0, 1.3, 12)
+    sparkleAt(b, 0.5, [84, 88, 91, 96, 100, 103, 108, 112], 0.06, 1.3)
+    sparkleAt(b, 1.6, [96, 100, 103, 108, 112, 115], 0.07, 1.2)
+    for (let i = 0; i < 5; i++) tone(b, 1.2 + i * 0.07, 0.05, midi(88 + i * 2), { wave: 'square', vol: 0.2, release: 0.2 })
+    // 最後まで続く和音（ドミソド）で、音の厚みを出す
+    ;[72, 76, 79, 84].forEach((n) => tone(b, 1.9, 1.2, midi(n), { wave: 'saw', vol: 0.09, attack: 0.02, release: 0.35, vibrato: 0.004 }))
+  }, 15),
+  sfx_zuko: sfx(0.75, (b, r) => zukoAt(b, 0, r), 16),
+  sfx_blip: sfx(0.3, (b) => { tone(b, 0, 0.04, midi(91), { wave: 'sine', vol: 0.5, release: 0.12 }); tone(b, 0.045, 0.05, midi(96), { wave: 'sine', vol: 0.45, release: 0.18 }) }, 17),
+  sfx_rise_1: sfx(0.55, (b) => riseAt(b, 1), 21),
+  sfx_rise_2: sfx(0.55, (b) => riseAt(b, 2), 22),
+  sfx_rise_3: sfx(0.55, (b) => riseAt(b, 3), 23),
+  sfx_rise_4: sfx(0.55, (b) => riseAt(b, 4), 24),
+  sfx_rise_5: sfx(0.55, (b) => riseAt(b, 5), 25),
 }
 
 fs.mkdirSync(OUT, { recursive: true })

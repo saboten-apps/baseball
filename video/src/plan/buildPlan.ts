@@ -1,9 +1,10 @@
 // 1週間分（7本）の動画の計画を作る。ゲームの実データから題材を選び、構成・つかみ・投稿文を決める。
 // 同じ週なら同じ結果になる。題材は、週ごとに順番に回すので、しばらく同じものが続かない。
-import { BGM, SFX, TEMPLATE_SFX } from '../audio.ts'
+import { BGM, SFX } from '../audio.ts'
 import { hashString, makeRng, pick, shuffle, type Rng } from './rng.ts'
 import { END_CARD_SEC, FPS, MAX_SEC, MIN_SEC, T, sec } from './timing.ts'
 import { GRADE, TEMPLATE_IDS, type GameData, type PlayerInfo, type TemplateId, type TemplateProps, type VideoProps, type VideoSpec } from './types.ts'
+import { soundPlan } from './soundPlan.ts'
 import { parseWeekId } from './week.ts'
 
 export const BASE_TAGS = ['#どうぶつベースボール', '#野球ゲーム', '#ブラウザゲーム']
@@ -242,7 +243,8 @@ export function buildWeekPlan(data: GameData, weekId: string): VideoSpec[] {
       day: DAYS[i],
       props,
       post: { title: b.title, caption: b.caption, hashtags },
-      audio: [b.bgm, ...[...TEMPLATE_SFX.common, ...TEMPLATE_SFX[template]].map((s) => SFX[s])],
+      // 使う音声（ライセンス照合用）：音の台本に出てくる効果音だけ
+      audio: [b.bgm, ...[...new Set(soundPlan(props).map((c) => c.sfx))].map((n) => SFX[n])],
     }
   })
 }

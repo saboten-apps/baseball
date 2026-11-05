@@ -1,7 +1,8 @@
 // どの動画でも使う部品：背景・テロップ・つかみ・効果音・数値のチップ・エンドカード
 import type React from 'react'
 import { AbsoluteFill, Audio, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion'
-import { SFX, type SfxName } from '../audio.ts'
+import { SFX, SFX_SEC, type SfxName } from '../audio.ts'
+import { bgmGain, duckWindows, type Cue } from '../plan/soundPlan.ts'
 import { END_CARD_SEC, sec } from '../plan/timing.ts'
 import { FONT, SAFE, paletteOf, type Palette } from '../theme.ts'
 
@@ -73,7 +74,7 @@ export const Safe: React.FC<{ children: React.ReactNode; justify?: React.CSSProp
 )
 
 export const Sfx: React.FC<{ name: SfxName; at: number; volume?: number }> = ({ name, at, volume = 0.9 }) => (
-  <Sequence from={Math.max(0, Math.round(at))} durationInFrames={sec(2)} layout="none">
+  <Sequence from={Math.max(0, Math.round(at))} durationInFrames={sec(SFX_SEC[name] + 0.1)} layout="none">
     <Audio src={staticFile(SFX[name])} volume={volume} />
   </Sequence>
 )
@@ -103,9 +104,6 @@ export const Hook: React.FC<{ text: string; palette: Palette; sub?: string; badg
         {sub ? <Telop size={58} delay={8}>{sub}</Telop> : null}
         {art ? <Picture src={art} width={540} height={356} /> : null}
       </Safe>
-      <Sfx name="whoosh" at={0} />
-      <Sfx name="pop" at={2} />
-      <Sfx name="ding" at={6} volume={0.6} />
     </AbsoluteFill>
   )
 }
@@ -135,23 +133,24 @@ export const EndCard: React.FC<{ palette: Palette }> = ({ palette }) => {
         <Telop size={64} delay={30}>ブラウザで無料！</Telop>
         <Caption size={46} delay={40}>プロフィールのリンクから遊べます</Caption>
       </Safe>
-      <Sfx name="sparkle" at={0} />
-      <Sfx name="pop" at={22} />
     </AbsoluteFill>
   )
 }
 
 /** 動画の外枠：背景・BGM（始めと終わりをなめらかに）・エンドカード */
-export const Frame: React.FC<{ palette: number; bgm: string; children: React.ReactNode }> = ({ palette, bgm, children }) => {
+export const Frame: React.FC<{ palette: number; bgm: string; cues: Cue[]; children: React.ReactNode }> = ({ palette, bgm, cues, children }) => {
   const { durationInFrames, fps } = useVideoConfig()
   const p = paletteOf(palette)
   const end = durationInFrames - END_CARD_SEC * fps
+  const windows = duckWindows(cues)
   return (
     <AbsoluteFill style={{ fontFamily: FONT, backgroundColor: p.bg[2] }}>
       <Background palette={p} />
       <Sequence durationInFrames={end}>{children}</Sequence>
       <Sequence from={end}><EndCard palette={p} /></Sequence>
-      <Audio src={staticFile(bgm)} volume={(f) => 0.42 * interpolate(f, [0, 6, durationInFrames - 25, durationInFrames], [0.6, 1, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })} />
+      <Audio src={staticFile(bgm)} volume={(f) => 0.42 * bgmGain(f, windows) * interpolate(f, [0, 6, durationInFrames - 25, durationInFrames], [0.6, 1, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })} />
+      {/* 音の台本（plan/soundPlan.ts）どおりに、効果音を鳴らす */}
+      {cues.map((c, i) => <Sfx key={i} name={c.sfx} at={c.at} volume={c.volume} />)}
     </AbsoluteFill>
   )
 }

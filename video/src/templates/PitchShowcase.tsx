@@ -1,7 +1,7 @@
 // 構成⑤：球種のスピード紹介。球種が次々に飛び込み、最高球速と、速さの目安の棒が出る
 import type React from 'react'
 import { AbsoluteFill, Sequence, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
-import { Hook, Safe, Sfx, Telop } from '../components/parts.tsx'
+import { Hook, Safe, Telop } from '../components/parts.tsx'
 import { T, sec } from '../plan/timing.ts'
 import type { PitchInfo, VideoProps } from '../plan/types.ts'
 import { FONT, paletteOf, type Palette } from '../theme.ts'
@@ -28,8 +28,6 @@ const One: React.FC<{ pitch: PitchInfo; i: number; palette: Palette }> = ({ pitc
           {pitch.min}〜{pitch.max}km/h
         </div>
       </Safe>
-      <Sfx name="whoosh" at={0} volume={0.6} />
-      <Sfx name="tick" at={5} volume={0.6} />
     </AbsoluteFill>
   )
 }
@@ -50,7 +48,6 @@ export const PitchShowcase: React.FC<VideoProps<'PitchShowcase'>> = ({ data, hoo
           <Telop size={80}>ほかにもまだまだ…</Telop>
           <Telop size={100} color={p.accent} stroke={p.ink} delay={8}>全{data.total}種類！</Telop>
         </Safe>
-        <Sfx name="ding" at={0} />
       </Sequence>
     </>
   )

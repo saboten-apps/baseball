@@ -1,7 +1,7 @@
 // 構成③：選手ランキング TOP3。3位→2位→1位の順に、能力値を出す。1位は最初「？？？」で、ドラムロールのあとにめくれる
 import type React from 'react'
 import { Sequence, interpolate, useCurrentFrame } from 'remotion'
-import { Hook, Safe, Sfx, Telop } from '../components/parts.tsx'
+import { Hook, Safe, Telop } from '../components/parts.tsx'
 import { T, sec } from '../plan/timing.ts'
 import type { VideoProps } from '../plan/types.ts'
 import { FONT, paletteOf, type Palette } from '../theme.ts'
@@ -33,8 +33,6 @@ const Card: React.FC<{ item: Item; metric: string; flipAt: number; palette: Pale
       </div>
       <Telop size={64} pop={false}>{metric}</Telop>
       <Telop size={150} color="#ffd23f" stroke={palette.ink} delay={flipAt + 4}>{item.grade}</Telop>
-      <Sfx name="drumroll" at={0} volume={0.6} />
-      <Sfx name={item.rank === 1 ? 'boom' : 'ding'} at={flipAt + 4} />
     </Safe>
   )
 }
