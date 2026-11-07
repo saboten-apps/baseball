@@ -23,6 +23,8 @@ page = page.replace(/<script src="[^"]*supabase-js[^>]+><\/script>/,
   () => '<script src="data:text/javascript;base64,' + fs.readFileSync(supabase).toString('base64') + '"></script>');
 page = page.replace(/<link rel="stylesheet" href="https:\/\/fonts[^>]+>/, '');
 page = page.replace(/<link rel="manifest"[^>]+>/, '');
+// 確認版は、アクセス計測（Cloudflare Web Analytics）を入れない
+page = page.replace(/<!-- Cloudflare Web Analytics -->[\s\S]*?<!-- End Cloudflare Web Analytics -->\n?/, '');
 page = page.replace(/<script>if \('serviceWorker'[\s\S]*?<\/script>/, '');
 const mime = { '.mp3': 'audio/mpeg', '.bin': 'application/octet-stream', '.png': 'image/png', '.webp': 'image/webp', '.mp4': 'video/mp4' };
 const assets = {};
