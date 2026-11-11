@@ -21,6 +21,10 @@ const js = jsFor(voiceIds);
 const scriptsFor = code => `<script src="${THREE_URL}"></script>\n<script src="${SUPABASE_URL}"></script>\n<script>\n${code}\n</script>\n`;
 const scripts = scriptsFor(js);
 
+// Cloudflare Web Analytics（ページの表示数だけを数える。ゲーム内のイベント計測はしない）。公開ページ（docs/index.html）にだけ入れる。
+// 確認版（tools/build-preview.mjs・build-mobile-preview.mjs）は、このタグを取り除く（確認版のアクセスを数えないため）。
+const ANALYTICS = `<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "07766e8bf1f34c78b7ddf9bce275726f"}'></script><!-- End Cloudflare Web Analytics -->`;
+
 const standalone = `<!doctype html>
 <html lang="ja">
 <head>
@@ -53,6 +57,7 @@ const standalone = `<!doctype html>
 html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; }
 [hidden] { display: none !important; }
 ${css}</style>
+${ANALYTICS}
 </head>
 <body>
 ${body}${scripts}<script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>
@@ -87,7 +92,7 @@ self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c =>
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
   const r = e.request, u = new URL(r.url);
-  if (r.method !== 'GET' || u.protocol.startsWith('ws') || u.hostname.endsWith('supabase.co')) return;
+  if (r.method !== 'GET' || u.protocol.startsWith('ws') || u.hostname.endsWith('supabase.co') || u.hostname.endsWith('cloudflareinsights.com')) return;
   if (r.mode === 'navigate') {
     e.respondWith(fetch(r).then(res => { const c = res.clone(); caches.open(CACHE).then(k => k.put('index.html', c)); return res; }).catch(() => caches.match('index.html')));
     return;

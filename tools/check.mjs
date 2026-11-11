@@ -71,6 +71,24 @@ try {
   console.error('✗ docs/index.html の読み込み失敗:', e.message);
 }
 
+// 3b. アクセス計測（Cloudflare Web Analytics）：公開ページの <head> に1つだけ。表示数の計測だけで、ゲーム内のイベント計測は入れない
+try {
+  const s = fs.readFileSync(path.join(ROOT, 'docs/index.html'), 'utf8');
+  const head = s.slice(0, s.indexOf('</head>'));
+  const tags = s.match(/<script[^>]*cloudflareinsights[^>]*><\/script>/g) || [];
+  const problems = [];
+  if (tags.length !== 1 || !head.includes(tags[0])) problems.push('計測タグが <head> に1つだけある状態になっていない');
+  if (tags[0] && !tags[0].includes('07766e8bf1f34c78b7ddf9bce275726f')) problems.push('計測のトークンが違う');
+  if (/cloudflareinsights|\bcfBeacon\b|__cfBeacon/.test(s.replace(tags[0] ?? '', '').replace(/<!-- (End )?Cloudflare Web Analytics -->/g, ''))) problems.push('計測タグ以外に、計測のコードがある（イベント計測は入れない）');
+  if (!fs.readFileSync(path.join(ROOT, 'docs/sw.js'), 'utf8').includes("endsWith('cloudflareinsights.com')")) problems.push('サービスワーカーが計測のスクリプトをキャッシュしてしまう');
+  if (fs.readFileSync(path.join(ROOT, 'dist/artifact.html'), 'utf8').includes('cloudflareinsights')) problems.push('Claude内プレビュー（dist/artifact.html）に計測タグが入っている');
+  if (problems.length) { ok = false; console.error('✗ アクセス計測の確認に失敗:\n  ' + problems.join('\n  ')); }
+  else console.log('✓ アクセス計測：公開ページの <head> に1つだけ（表示数の計測のみ・確認版には入れない）');
+} catch (e) {
+  ok = false;
+  console.error('✗ アクセス計測の確認に失敗:', e.message);
+}
+
 // 4. 旧ユーザー名チェック
 try {
   execFileSync('git', ['grep', '-qi', 'hojo0729', '--', '.', ':!tools/check.sh', ':!tools/check.mjs'], { cwd: ROOT, stdio: 'ignore' });

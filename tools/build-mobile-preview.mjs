@@ -12,6 +12,8 @@ const out = 'dist/mobile-preview';
 fs.mkdirSync(out + '/icons', { recursive: true });
 let page = fs.readFileSync('dist/animal-baseball-playtest.html', 'utf8');
 page = page.replace('<title>どうぶつベースボール</title>', '<title>どうぶつベースボール・スマホ確認版</title>');
+// 確認版は、アクセス計測（Cloudflare Web Analytics）を入れない（本番の表示数に混ぜない）
+page = page.replace(/<!-- Cloudflare Web Analytics -->[\s\S]*?<!-- End Cloudflare Web Analytics -->\n?/, '');
 // Pages repositories share an origin. Keep preview saves, preferences, links and rooms separate.
 page = page.replace(/(['"])(yakyu-[a-z-]+|animal-baseball-story-v2)\1/g, (_, quote, key) => quote + 'mobile-preview-' + key + quote);
 page = page.replace(".channel('yakyu-' + code", ".channel('mobile-preview-yakyu-' + code");
