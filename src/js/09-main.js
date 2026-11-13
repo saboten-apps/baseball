@@ -371,7 +371,7 @@ function update(now, dt) {
   refreshShown();
   const bj = batterJ(now, k); poseFig(batterF, squashJ(bj.J, 0, true), shownLeft ? -Math.PI / 2 : Math.PI / 2, Math.PI);
   batG.position.copy(bj.G); batG.quaternion.setFromUnitVectors(_Y, bj.dir);
-  updateStars(now, bj, pj);
+  updateStars(now, bj, pj, k);
   updateBeastEffects(now, pj, bj);
   batAura.material.color.set('#ffc845'); pitAura.material.color.set('#ffc845');
   for (const role of ['pit', 'bat']) if (beastForRole(role)) {

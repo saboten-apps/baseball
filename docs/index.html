@@ -269,7 +269,10 @@ button:focus-visible { outline: 2px solid var(--lamp); outline-offset: 2px; }
 @keyframes popBig { 0% { opacity: 0; transform: scale(.4) rotate(-6deg); } 10% { opacity: 1; transform: scale(1.18) rotate(-3deg); } 20% { transform: scale(1) rotate(-2deg); } 85% { opacity: 1; } 100% { opacity: 0; transform: scale(1.04) rotate(-2deg); } }
 
 /* ハプニング */
-#hap { top: 112px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0, 0, 0, .45); }
+/* 能力の説明・ハプニング：投手（画面の上のほう）とストライクゾーンにかからないよう、ゾーンの下・実況（#cmt）の上に出す。背の低い画面だけは下に空きがないので、従来どおり上（投手の頭の下）に出す */
+#hap { top: auto; bottom: 96px; width: max-content; padding: 5px 12px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0, 0, 0, .45); }
+#hap span { font-size: 11px; margin-top: 1px; }
+@media (max-height: 620px) { #hap { top: 112px; bottom: auto; } }
 #hap.alert { border-color: #ff9a5a; background: linear-gradient(180deg, rgba(60, 28, 14, .92), rgba(28, 14, 8, .92)); }
 #hapB { position: absolute; top: 90px; left: 12px; z-index: 5; font: 700 11px var(--f-body); color: #ffd866; background: rgba(40, 26, 6, .72); border: 1px solid rgba(255, 216, 102, .6); border-radius: 999px; padding: 5px 10px; pointer-events: none; }
 #hapB:empty { display: none; }
@@ -2734,12 +2737,17 @@ batG.add(batBody, batCap, knob, grip);
 const auraMat = () => new THREE.SpriteMaterial({ map: ballGlowTex, color: '#ffc845', transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
 const batAura = new THREE.Sprite(auraMat()), pitAura = new THREE.Sprite(auraMat());
 scene.add(batAura, pitAura);
-let starBatOn = null;
-function updateStars(now, bj, pj) {
-  const on = !!G && phase !== 'idle', bs = on && shownStar, ps = on && curPitcher().star, pulse = 0.5 + 0.2 * Math.sin(now * 4);
-  batAura.visible = bs; pitAura.visible = ps;
-  if (bs) { batAura.position.copy(bj.J.pelvis); batAura.position.y += 0.15; batAura.position.z -= 0.3; batAura.scale.setScalar(2.6); batAura.material.opacity = pulse; }
-  if (ps) { pitAura.position.copy(pj.pelvis); pitAura.position.z -= 0.4; pitAura.scale.setScalar(2.4); pitAura.material.opacity = pulse * 0.9; }
+let starBatOn = null, starGlow = 1, starGlowAt = 0;
+function updateStars(now, bj, pj, k) {
+  const on = !!G && phase !== 'idle', bs = on && shownStar, ps = on && curPitcher().star, pulse = 0.5 + 0.5 * Math.sin(now * 4);
+  // 球が来る間（投手の振りかぶり〜ボールが飛んでいる間）は、金色の発光を消す：白い小さなボールが、光の中で見えなくなるため。それ以外も、弱くする
+  // （打つ側のときは、振りかぶりは phase 'wait' の最後の0.85秒：pitcherK が 0 より大きい間）
+  const live = phase === 'deliver' || phase === 'fly' || (phase === 'wait' && k > 0.02), dt = Math.min(0.1, Math.max(0, now - starGlowAt));
+  starGlowAt = now;
+  starGlow = Math.min(1, Math.max(0, starGlow + (live ? -12 : 3) * dt));
+  batAura.visible = bs && starGlow > 0.01; pitAura.visible = ps && starGlow > 0.01;
+  if (batAura.visible) { batAura.position.copy(bj.J.pelvis); batAura.position.y += 0.15; batAura.position.z -= 0.3; batAura.scale.setScalar(2.2); batAura.material.opacity = (0.14 + 0.06 * pulse) * starGlow; }
+  if (pitAura.visible) { pitAura.position.copy(pj.pelvis); pitAura.position.z -= 0.4; pitAura.scale.setScalar(2.0); pitAura.material.opacity = (0.12 + 0.05 * pulse) * starGlow; }
   if (starBatOn !== bs) {
     starBatOn = bs;
     WOOD.color.set(bs ? '#f2c14e' : '#c99a5c'); WOOD.emissive.set(bs ? '#5a3c00' : '#000000');
@@ -5481,7 +5489,7 @@ function update(now, dt) {
   refreshShown();
   const bj = batterJ(now, k); poseFig(batterF, squashJ(bj.J, 0, true), shownLeft ? -Math.PI / 2 : Math.PI / 2, Math.PI);
   batG.position.copy(bj.G); batG.quaternion.setFromUnitVectors(_Y, bj.dir);
-  updateStars(now, bj, pj);
+  updateStars(now, bj, pj, k);
   updateBeastEffects(now, pj, bj);
   batAura.material.color.set('#ffc845'); pitAura.material.color.set('#ffc845');
   for (const role of ['pit', 'bat']) if (beastForRole(role)) {
