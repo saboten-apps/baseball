@@ -53,6 +53,9 @@ window.__dbg.plushContact=()=>{
   return Math.max(...errors);
 };
 window.__dbg.plushPreview=()=>showMascotGallery(0);
+window.__dbg.makeStars=()=>{for(const t of Object.values(ROSTER)){if(t.pit)t.pit[0][5]=String(t.pit[0][5]||'R').replace('*','')+'*';if(t.bat)t.bat[0][3]=String(t.bat[0][3]||'R').replace('*','')+'*';}};
+window.__dbg.starGlow=()=>({phase,pk:pitcherK(now_()),bat:{v:batAura.visible,o:batAura.material.opacity},pit:{v:pitAura.visible,o:pitAura.material.opacity},k:starGlow,batStar:!!shownStar,pitStar:!!curPitcher().star});
+window.__dbg.hap=(n,d)=>queueHap({n,d});
 window.__dbg.plushState=()=>{const f=mascotGallery.f;return {species:f.sp,plush:!!f.plush&&f.plush.root.visible,base:f.body.visible,head:f.head.visible,meshes:f.plush?f.plush.root.children.length:0,face:f.ex};};
 window.__dbg.reviewOfferExpire=()=>{if(onlineReview.ctx){onlineReview.ctx.until=now_()-1;nextAt=Infinity;}};
 window.__dbg.pitcherView=(team,k=0,beast=false)=>{

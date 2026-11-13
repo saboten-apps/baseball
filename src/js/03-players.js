@@ -506,12 +506,17 @@ batG.add(batBody, batCap, knob, grip);
 const auraMat = () => new THREE.SpriteMaterial({ map: ballGlowTex, color: '#ffc845', transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
 const batAura = new THREE.Sprite(auraMat()), pitAura = new THREE.Sprite(auraMat());
 scene.add(batAura, pitAura);
-let starBatOn = null;
-function updateStars(now, bj, pj) {
-  const on = !!G && phase !== 'idle', bs = on && shownStar, ps = on && curPitcher().star, pulse = 0.5 + 0.2 * Math.sin(now * 4);
-  batAura.visible = bs; pitAura.visible = ps;
-  if (bs) { batAura.position.copy(bj.J.pelvis); batAura.position.y += 0.15; batAura.position.z -= 0.3; batAura.scale.setScalar(2.6); batAura.material.opacity = pulse; }
-  if (ps) { pitAura.position.copy(pj.pelvis); pitAura.position.z -= 0.4; pitAura.scale.setScalar(2.4); pitAura.material.opacity = pulse * 0.9; }
+let starBatOn = null, starGlow = 1, starGlowAt = 0;
+function updateStars(now, bj, pj, k) {
+  const on = !!G && phase !== 'idle', bs = on && shownStar, ps = on && curPitcher().star, pulse = 0.5 + 0.5 * Math.sin(now * 4);
+  // 球が来る間（投手の振りかぶり〜ボールが飛んでいる間）は、金色の発光を消す：白い小さなボールが、光の中で見えなくなるため。それ以外も、弱くする
+  // （打つ側のときは、振りかぶりは phase 'wait' の最後の0.85秒：pitcherK が 0 より大きい間）
+  const live = phase === 'deliver' || phase === 'fly' || (phase === 'wait' && k > 0.02), dt = Math.min(0.1, Math.max(0, now - starGlowAt));
+  starGlowAt = now;
+  starGlow = Math.min(1, Math.max(0, starGlow + (live ? -12 : 3) * dt));
+  batAura.visible = bs && starGlow > 0.01; pitAura.visible = ps && starGlow > 0.01;
+  if (batAura.visible) { batAura.position.copy(bj.J.pelvis); batAura.position.y += 0.15; batAura.position.z -= 0.3; batAura.scale.setScalar(2.2); batAura.material.opacity = (0.14 + 0.06 * pulse) * starGlow; }
+  if (pitAura.visible) { pitAura.position.copy(pj.pelvis); pitAura.position.z -= 0.4; pitAura.scale.setScalar(2.0); pitAura.material.opacity = (0.12 + 0.05 * pulse) * starGlow; }
   if (starBatOn !== bs) {
     starBatOn = bs;
     WOOD.color.set(bs ? '#f2c14e' : '#c99a5c'); WOOD.emissive.set(bs ? '#5a3c00' : '#000000');
