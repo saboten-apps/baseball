@@ -21,18 +21,26 @@ export const SFX = {
   buzzer: `${dir}/sfx_buzzer.wav`,
   coin: `${dir}/sfx_coin.wav`,
   stamp: `${dir}/sfx_stamp.wav`,
+  // 期待→緊張→報酬の音設計（scripts/synthAudio.ts がコードで合成）
+  crack: `${dir}/sfx_crack.wav`,
+  fanfare: `${dir}/sfx_fanfare.wav`,
+  winner: `${dir}/sfx_winner.wav`,
+  homerun: `${dir}/sfx_homerun.wav`,
+  jackpot: `${dir}/sfx_jackpot.wav`,
+  zuko: `${dir}/sfx_zuko.wav`,
+  blip: `${dir}/sfx_blip.wav`,
+  rise_1: `${dir}/sfx_rise_1.wav`,
+  rise_2: `${dir}/sfx_rise_2.wav`,
+  rise_3: `${dir}/sfx_rise_3.wav`,
+  rise_4: `${dir}/sfx_rise_4.wav`,
+  rise_5: `${dir}/sfx_rise_5.wav`,
 } as const
 
 export type SfxName = keyof typeof SFX
 
-/** テンプレートで使う効果音（ライセンス照合用。テンプレートを変えたら、ここも合わせる） */
-export const TEMPLATE_SFX: Record<string, SfxName[]> = {
-  common: ['whoosh', 'pop', 'sparkle'],
-  TraitQuiz: ['tick', 'ding', 'buzzer'],
-  PitchSpeedQuiz: ['tick', 'ding', 'whoosh'],
-  RankingCountdown: ['drumroll', 'ding', 'boom'],
-  VersusDuel: ['tick', 'boom', 'stamp', 'ding'],
-  PitchShowcase: ['whoosh', 'tick'],
-  StoryTeaser: ['ding', 'whoosh'],
-  ScreenTour: [],
+/** 各効果音の長さ（秒）。再生の枠（Sequence）の長さに使う。synthAudio.ts と合わせる */
+export const SFX_SEC: Record<SfxName, number> = {
+  pop: 0.25, whoosh: 0.5, ding: 1.2, tick: 0.12, drumroll: 1.6, boom: 1.0, sparkle: 0.9, buzzer: 0.6, coin: 0.6, stamp: 0.6,
+  crack: 0.7, fanfare: 1.6, winner: 1.8, homerun: 3.2, jackpot: 3.5, zuko: 0.75, blip: 0.3,
+  rise_1: 0.55, rise_2: 0.55, rise_3: 0.55, rise_4: 0.55, rise_5: 0.55,
 }

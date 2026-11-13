@@ -1,7 +1,7 @@
 // 構成②：球速クイズ。球種の名前を出し「最高何km/h？」→ 4択 → 3・2・1 → 正解 → 他の球種との速さ比べ
 import type React from 'react'
 import { Sequence, interpolate, useCurrentFrame } from 'remotion'
-import { ChoiceList, CountdownBadge, Hook, Safe, Sfx, Telop } from '../components/parts.tsx'
+import { ChoiceList, CountdownBadge, Hook, Safe, Telop } from '../components/parts.tsx'
 import { T, sec } from '../plan/timing.ts'
 import type { PitchSpeedQuizProps, VideoProps } from '../plan/types.ts'
 import { FONT, paletteOf, type Palette } from '../theme.ts'
@@ -29,7 +29,6 @@ const Compare: React.FC<{ data: PitchSpeedQuizProps; palette: Palette }> = ({ da
           )
         })}
       </div>
-      <Sfx name="whoosh" at={0} />
     </Safe>
   )
 }
@@ -49,8 +48,6 @@ export const PitchSpeedQuiz: React.FC<VideoProps<'PitchSpeedQuiz'>> = ({ data, h
           <ChoiceList options={options} answerIndex={data.answerIndex} reveal={false} palette={p} />
           <Sequence from={sec(t.question)} layout="none"><CountdownBadge palette={p} /></Sequence>
         </Safe>
-        <Sfx name="pop" at={0} />
-        {[0, 1, 2].map((k) => <Sfx key={k} name="tick" at={sec(t.question) + k * 30} />)}
       </Sequence>
       <Sequence from={b} durationInFrames={c - b}>
         <Safe gap={30}>
@@ -58,7 +55,6 @@ export const PitchSpeedQuiz: React.FC<VideoProps<'PitchSpeedQuiz'>> = ({ data, h
           <ChoiceList options={options} answerIndex={data.answerIndex} reveal palette={p} />
           <Telop size={58} delay={10}>{data.pitch.min}〜{data.pitch.max}km/h</Telop>
         </Safe>
-        <Sfx name="ding" at={0} />
       </Sequence>
       <Sequence from={c}><Compare data={data} palette={p} /></Sequence>
     </>

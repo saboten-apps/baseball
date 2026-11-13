@@ -1,7 +1,7 @@
 // 構成④：打者対決。2人の能力値を並べ、3・2・1 のあとで「強いのはどっち？」の答えを出す
 import type React from 'react'
 import { Sequence, spring, useCurrentFrame, useVideoConfig } from 'remotion'
-import { CountdownBadge, GradeBar, Hook, Safe, Sfx, Telop } from '../components/parts.tsx'
+import { CountdownBadge, GradeBar, Hook, Safe, Telop } from '../components/parts.tsx'
 import { T, sec } from '../plan/timing.ts'
 import { GRADE, type PlayerInfo, type VideoProps } from '../plan/types.ts'
 import { FONT, paletteOf, type Palette } from '../theme.ts'
@@ -36,7 +36,6 @@ const Stats: React.FC<{ data: VideoProps<'VersusDuel'>['data'] }> = ({ data }) =
         <GradeBar label="" value={r.b} color={COLORS[1]} delay={i * 12 + 6} grade={g(r.b)} />
       </div>
     ))}
-    <Sfx name="whoosh" at={0} />
   </Safe>
 )
 
@@ -54,8 +53,6 @@ const Result: React.FC<{ data: VideoProps<'VersusDuel'>['data']; palette: Palett
         <div style={{ fontSize: 50, color: '#1d0f3a', opacity: 0.75 }}>{win.teamName}</div>
       </div>
       <Telop size={64} color={palette.accent} stroke={palette.ink} delay={24}>ミート＋パワーの合計で比較</Telop>
-      <Sfx name="stamp" at={6} />
-      <Sfx name="ding" at={8} />
     </Safe>
   )
 }
@@ -75,7 +72,6 @@ export const VersusDuel: React.FC<VideoProps<'VersusDuel'>> = ({ data, hook, hoo
           </div>
           <Telop size={150} color={p.accent} stroke={p.ink} delay={14}>VS</Telop>
         </Safe>
-        <Sfx name="boom" at={14} />
       </Sequence>
       <Sequence from={b} durationInFrames={c - b}><Stats data={data} /></Sequence>
       <Sequence from={c} durationInFrames={d - c}>
@@ -83,7 +79,6 @@ export const VersusDuel: React.FC<VideoProps<'VersusDuel'>> = ({ data, hook, hoo
           <Telop size={84}>どっちが強い？</Telop>
           <CountdownBadge palette={p} />
         </Safe>
-        {[0, 1, 2].map((k) => <Sfx key={k} name="tick" at={k * 30} />)}
       </Sequence>
       <Sequence from={d}><Result data={data} palette={p} /></Sequence>
     </>

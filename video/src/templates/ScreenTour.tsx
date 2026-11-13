@@ -1,7 +1,7 @@
 // 構成⑦：実際のゲーム画面の紹介。冒頭は画面を高速で切り替え、その後1画面ずつズームしながら説明
 import type React from 'react'
 import { AbsoluteFill, Img, Sequence, interpolate, staticFile, useCurrentFrame } from 'remotion'
-import { Hook, Safe, Sfx, Telop } from '../components/parts.tsx'
+import { Hook, Safe, Telop } from '../components/parts.tsx'
 import { T, sec } from '../plan/timing.ts'
 import type { ScreenShot, ScreenTourProps, VideoProps } from '../plan/types.ts'
 import { paletteOf, type Palette } from '../theme.ts'
@@ -50,7 +50,6 @@ const Shot: React.FC<{ shot: ScreenShot; i: number; counts: ScreenTourProps['cou
         <Phone shot={shot} zoom={i % 2 === 0 ? [1, 1.1] : [1.1, 1]} />
       </div>
       <Telop size={50} delay={8}>{note}</Telop>
-      <Sfx name="whoosh" at={0} volume={0.6} />
     </Safe>
   )
 }
