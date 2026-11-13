@@ -238,7 +238,10 @@ button:focus-visible { outline: 2px solid var(--lamp); outline-offset: 2px; }
 @keyframes popBig { 0% { opacity: 0; transform: scale(.4) rotate(-6deg); } 10% { opacity: 1; transform: scale(1.18) rotate(-3deg); } 20% { transform: scale(1) rotate(-2deg); } 85% { opacity: 1; } 100% { opacity: 0; transform: scale(1.04) rotate(-2deg); } }
 
 /* ハプニング */
-#hap { top: 112px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0, 0, 0, .45); }
+/* 能力の説明・ハプニング：投手（画面の上のほう）とストライクゾーンにかからないよう、ゾーンの下・実況（#cmt）の上に出す。背の低い画面だけは下に空きがないので、従来どおり上（投手の頭の下）に出す */
+#hap { top: auto; bottom: 96px; width: max-content; padding: 5px 12px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0, 0, 0, .45); }
+#hap span { font-size: 11px; margin-top: 1px; }
+@media (max-height: 620px) { #hap { top: 112px; bottom: auto; } }
 #hap.alert { border-color: #ff9a5a; background: linear-gradient(180deg, rgba(60, 28, 14, .92), rgba(28, 14, 8, .92)); }
 #hapB { position: absolute; top: 90px; left: 12px; z-index: 5; font: 700 11px var(--f-body); color: #ffd866; background: rgba(40, 26, 6, .72); border: 1px solid rgba(255, 216, 102, .6); border-radius: 999px; padding: 5px 10px; pointer-events: none; }
 #hapB:empty { display: none; }
